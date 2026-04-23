@@ -8,6 +8,10 @@ const CANVAS_HEIGHT = GAME_HEIGHT + HUD_HEIGHT;
 const PLAYER_SIZE = 12;
 const ENEMY_SIZE = 12;
 const STORAGE_KEY = 'byte-breach-hi-score';
+const MAX_FRAME_DELTA = 1 / 30;
+const ENERGYCELL_SPAWN_BASE_CHANCE = 0.2;
+const ENERGYCELL_SPAWN_RAMP_PER_SECOND = 0.004;
+const ENERGYCELL_SPAWN_MAX_CHANCE = 0.45;
 
 const TILE = {
   FLOOR_A: 0,
@@ -137,7 +141,7 @@ let lastTime = performance.now();
 requestAnimationFrame(frame);
 
 function frame(now) {
-  const delta = Math.min((now - lastTime) / 1000, 0.033);
+  const delta = Math.min((now - lastTime) / 1000, MAX_FRAME_DELTA);
   lastTime = now;
   update(game, delta);
   render(game, ctx);
@@ -254,7 +258,11 @@ function update(game, delta) {
   game.dangerLevel = 1 + Math.floor(game.elapsed / 18);
   game.itemSpawnTimer -= delta;
   if (game.itemSpawnTimer <= 0 && game.items.length < 6) {
-    const type = Math.random() < Math.min(0.2 + game.elapsed * 0.004, 0.45) ? 'energycell' : 'datachip';
+    const energyCellChance = Math.min(
+      ENERGYCELL_SPAWN_BASE_CHANCE + game.elapsed * ENERGYCELL_SPAWN_RAMP_PER_SECOND,
+      ENERGYCELL_SPAWN_MAX_CHANCE
+    );
+    const type = Math.random() < energyCellChance ? 'energycell' : 'datachip';
     spawnCollectible(game, type);
     game.itemSpawnTimer = 2.4;
   }
@@ -476,9 +484,9 @@ function drawHud(ctx, game) {
   drawLabel(ctx, LABEL_ROW.HI_SCORE, 168, 12);
   drawDigits(ctx, game.highScore, 248, 12, 6);
 
-  const timeText = Math.min(999, Math.floor(game.elapsed)).toString().padStart(3, '0');
+  const elapsedSeconds = Math.min(999, Math.floor(game.elapsed)).toString().padStart(3, '0');
   ctx.drawImage(assets.iconLife, 0, 0, 8, 8, 16, 22, 8, 8);
-  drawDigits(ctx, timeText, 28, 22, 3);
+  drawDigits(ctx, elapsedSeconds, 28, 22, 3);
   ctx.fillStyle = game.flashTimer > 0 ? 'rgba(255, 94, 94, 0.35)' : 'rgba(83, 245, 255, 0.1)';
   ctx.fillRect(156, 22, Math.min(140, game.dangerLevel * 20), 6);
   ctx.strokeStyle = 'rgba(215, 230, 255, 0.35)';

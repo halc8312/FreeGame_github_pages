@@ -31,10 +31,14 @@ jobs:
 
       - name: Prepare static artifact
         run: |
+          shopt -s nullglob
           mkdir -p dist
           cp index.html dist/
           cp -R css js dist/
-          cp *.png dist/
+          png_files=( *.png )
+          if [ ${#png_files[@]} -gt 0 ]; then
+            cp "${png_files[@]}" dist/
+          fi
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
