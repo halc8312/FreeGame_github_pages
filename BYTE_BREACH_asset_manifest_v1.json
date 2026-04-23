@@ -1,0 +1,178 @@
+[
+  {
+    "file": "player_idle_sheet_native.png",
+    "category": "player",
+    "usage": "idle 4dir",
+    "frame_size": "16x16",
+    "frames": 8,
+    "layout": "horizontal",
+    "fps": "6-8",
+    "collision": "12x12",
+    "notes": "order up2,down2,left2,right2"
+  },
+  {
+    "file": "player_move_sheet_native.png",
+    "category": "player",
+    "usage": "move 4dir",
+    "frame_size": "16x16",
+    "frames": 16,
+    "layout": "horizontal",
+    "fps": "8-12",
+    "collision": "12x12",
+    "notes": "order up4,down4,left4,right4"
+  },
+  {
+    "file": "player_down_sheet_native.png",
+    "category": "player",
+    "usage": "down/common",
+    "frame_size": "16x16",
+    "frames": 4,
+    "layout": "horizontal",
+    "fps": "10-14",
+    "collision": "12x12",
+    "notes": "electronic failure style"
+  },
+  {
+    "file": "item_datachip_sheet.png",
+    "category": "item",
+    "usage": "score pickup",
+    "frame_size": "16x16",
+    "frames": 4,
+    "layout": "horizontal",
+    "fps": "6-10",
+    "collision": "12x12",
+    "notes": "cyan core pulse"
+  },
+  {
+    "file": "item_energycell_sheet.png",
+    "category": "item",
+    "usage": "bonus pickup",
+    "frame_size": "16x16",
+    "frames": 4,
+    "layout": "horizontal",
+    "fps": "6-10",
+    "collision": "12x12",
+    "notes": "vertical pulse"
+  },
+  {
+    "file": "enemy_drone_patrol_sheet.png",
+    "category": "enemy",
+    "usage": "patrol drone",
+    "frame_size": "16x16",
+    "frames": 4,
+    "layout": "horizontal",
+    "fps": "6-10",
+    "collision": "12x12",
+    "notes": "directionless hover"
+  },
+  {
+    "file": "enemy_drone_chase_sheet.png",
+    "category": "enemy",
+    "usage": "chase drone",
+    "frame_size": "16x16",
+    "frames": 4,
+    "layout": "horizontal",
+    "fps": "6-10",
+    "collision": "12x12",
+    "notes": "red sensor hover"
+  },
+  {
+    "file": "tileset_facility_base.png",
+    "category": "tileset",
+    "usage": "facility base",
+    "frame_size": "16x16",
+    "frames": 11,
+    "layout": "horizontal",
+    "fps": "-",
+    "collision": "per tile",
+    "notes": "floor/wall/door/terminal/pipe/pillar/hazard/spawn"
+  },
+  {
+    "file": "ui_digits_8x8.png",
+    "category": "ui",
+    "usage": "numeric font",
+    "frame_size": "8x8",
+    "frames": 10,
+    "layout": "horizontal",
+    "fps": "-",
+    "collision": "-",
+    "notes": "digits 0-9"
+  },
+  {
+    "file": "ui_labels_minimal.png",
+    "category": "ui",
+    "usage": "labels",
+    "frame_size": "variable x 8",
+    "frames": 5,
+    "layout": "vertical groups",
+    "fps": "-",
+    "collision": "-",
+    "notes": "SCORE,HI-SCORE,START,GAME OVER,RETRY"
+  },
+  {
+    "file": "ui_icon_life_8x8.png",
+    "category": "ui",
+    "usage": "life icon",
+    "frame_size": "8x8",
+    "frames": 1,
+    "layout": "single",
+    "fps": "-",
+    "collision": "-",
+    "notes": "optional if life system used"
+  },
+  {
+    "file": "ui_panel_3slice_16x16.png",
+    "category": "ui",
+    "usage": "panel parts",
+    "frame_size": "16x16",
+    "frames": 3,
+    "layout": "horizontal",
+    "fps": "-",
+    "collision": "-",
+    "notes": "left+mid*n+right"
+  },
+  {
+    "file": "fx_pickup_sheet.png",
+    "category": "fx",
+    "usage": "pickup fx",
+    "frame_size": "16x16",
+    "frames": 4,
+    "layout": "horizontal",
+    "fps": "10-14",
+    "collision": "-",
+    "notes": "pickup sparkle"
+  },
+  {
+    "file": "fx_hit_spark_sheet.png",
+    "category": "fx",
+    "usage": "hit fx",
+    "frame_size": "16x16",
+    "frames": 4,
+    "layout": "horizontal",
+    "fps": "12-16",
+    "collision": "-",
+    "notes": "damage spark"
+  },
+  {
+    "file": "fx_explosion_sheet.png",
+    "category": "fx",
+    "usage": "explosion fx",
+    "frame_size": "16x16",
+    "frames": 5,
+    "layout": "horizontal",
+    "fps": "10-14",
+    "collision": "-",
+    "notes": "drone break / down assist"
+  },
+  {
+    "file": "fx_spawn_sheet.png",
+    "category": "fx",
+    "usage": "spawn fx",
+    "frame_size": "16x16",
+    "frames": 4,
+    "layout": "horizontal",
+    "fps": "8-12",
+    "collision": "-",
+    "notes": "spawn / appear"
+  }
+]

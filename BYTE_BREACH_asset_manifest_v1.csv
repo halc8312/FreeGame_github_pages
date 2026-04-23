@@ -1,0 +1,17 @@
+file,category,usage,frame_size,frames,layout,fps,collision,notes
+player_idle_sheet_native.png,player,idle 4dir,16x16,8,horizontal,6-8,12x12,"order up2,down2,left2,right2"
+player_move_sheet_native.png,player,move 4dir,16x16,16,horizontal,8-12,12x12,"order up4,down4,left4,right4"
+player_down_sheet_native.png,player,down/common,16x16,4,horizontal,10-14,12x12,electronic failure style
+item_datachip_sheet.png,item,score pickup,16x16,4,horizontal,6-10,12x12,cyan core pulse
+item_energycell_sheet.png,item,bonus pickup,16x16,4,horizontal,6-10,12x12,vertical pulse
+enemy_drone_patrol_sheet.png,enemy,patrol drone,16x16,4,horizontal,6-10,12x12,directionless hover
+enemy_drone_chase_sheet.png,enemy,chase drone,16x16,4,horizontal,6-10,12x12,red sensor hover
+tileset_facility_base.png,tileset,facility base,16x16,11,horizontal,-,per tile,floor/wall/door/terminal/pipe/pillar/hazard/spawn
+ui_digits_8x8.png,ui,numeric font,8x8,10,horizontal,-,-,digits 0-9
+ui_labels_minimal.png,ui,labels,variable x 8,5,vertical groups,-,-,"SCORE,HI-SCORE,START,GAME OVER,RETRY"
+ui_icon_life_8x8.png,ui,life icon,8x8,1,single,-,-,optional if life system used
+ui_panel_3slice_16x16.png,ui,panel parts,16x16,3,horizontal,-,-,left+mid*n+right
+fx_pickup_sheet.png,fx,pickup fx,16x16,4,horizontal,10-14,-,pickup sparkle
+fx_hit_spark_sheet.png,fx,hit fx,16x16,4,horizontal,12-16,-,damage spark
+fx_explosion_sheet.png,fx,explosion fx,16x16,5,horizontal,10-14,-,drone break / down assist
+fx_spawn_sheet.png,fx,spawn fx,16x16,4,horizontal,8-12,-,spawn / appear
