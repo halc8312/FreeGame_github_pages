@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="BYTE BREACH - GitHub Pages で遊べる 1 画面スコアアタック型収集アクション"
+    />
+    <title>BYTE BREACH</title>
+    <link rel="stylesheet" href="./css/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="shell__header">
+        <h1>BYTE BREACH</h1>
+        <p>WASD / 矢印キーで移動・Space / Enter で開始とリトライ</p>
+      </header>
+      <section class="game-frame" aria-label="BYTE BREACH game area">
+        <canvas id="game" width="320" height="240"></canvas>
+      </section>
+      <section class="shell__notes">
+        <p>データチップを回収し、ドローンと危険床を避けてハイスコアを更新してください。</p>
+      </section>
+    </main>
+    <script type="module" src="./js/game.js"></script>
+  </body>
+</html>
