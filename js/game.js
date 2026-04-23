@@ -316,7 +316,7 @@ function updateItems(game, delta) {
     if (distance(game.player.x, game.player.y, item.x, item.y) < 12) {
       const value = item.type === 'energycell' ? 350 : 100;
       game.player.score += value;
-      game.highScore = Math.max(game.highScore, game.player.score, game.highScore);
+      game.highScore = Math.max(game.highScore, game.player.score);
       spawnEffect(game, 'pickup', item.x, item.y, 12);
       game.items = game.items.filter((entry) => entry !== item);
       break;
