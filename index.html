@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="BYTE BREACH - a one-screen score attack action game playable directly on GitHub Pages"
+    />
+    <title>BYTE BREACH</title>
+    <link rel="stylesheet" href="./css/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="shell__header">
+        <h1>BYTE BREACH</h1>
+        <p>Move with WASD or Arrow Keys. Press Space or Enter to start and retry.</p>
+      </header>
+      <section class="game-frame" aria-label="BYTE BREACH game area">
+        <canvas id="game" width="320" height="240"></canvas>
+      </section>
+      <section class="shell__notes">
+        <p>Collect data chips, grab energy cells, and dodge drones and hazard tiles for a new high score.</p>
+      </section>
+    </main>
+    <script type="module" src="./js/game.js"></script>
+  </body>
+</html>
