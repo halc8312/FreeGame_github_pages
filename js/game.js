@@ -131,6 +131,7 @@ window.addEventListener('keyup', (event) => keys.delete(event.code));
 window.addEventListener('blur', () => keys.clear());
 
 const assets = await loadAssets(assetFiles);
+const labelMetrics = measureLabelRows(assets.labels, Object.keys(LABEL_ROW).length);
 const game = createGame();
 let lastTime = performance.now();
 requestAnimationFrame(frame);
@@ -496,9 +497,9 @@ function drawOverlay(ctx, game) {
     ctx.font = '12px Arial';
     ctx.fillStyle = '#8eb8db';
     ctx.fillText('Collect chips, dodge drones, survive the breach.', CANVAS_WIDTH / 2, 108);
-    drawLabel(ctx, LABEL_ROW.START, 124, 128);
+    drawCenteredLabel(ctx, LABEL_ROW.START, 128);
     if (Math.floor(game.sceneTime * 2) % 2 === 0) {
-      drawLabel(ctx, LABEL_ROW.RETRY, 124, 150);
+      drawCenteredLabel(ctx, LABEL_ROW.RETRY, 150);
     }
     ctx.fillStyle = '#9db5cc';
     ctx.fillText('Press Space / Enter', CANVAS_WIDTH / 2, 175);
@@ -510,9 +511,9 @@ function drawOverlay(ctx, game) {
     ctx.fillStyle = 'rgba(40, 0, 10, 0.58)';
     ctx.fillRect(0, 0, CANVAS_WIDTH, GAME_HEIGHT);
     drawCenteredPanel(ctx, 208, 72);
-    drawLabel(ctx, LABEL_ROW.GAME_OVER, 124, 104);
+    drawCenteredLabel(ctx, LABEL_ROW.GAME_OVER, 104);
     if (Math.floor(game.sceneTime * 2.5) % 2 === 0) {
-      drawLabel(ctx, LABEL_ROW.RETRY, 124, 128);
+      drawCenteredLabel(ctx, LABEL_ROW.RETRY, 128);
     }
     ctx.fillStyle = '#ffd7de';
     ctx.font = '12px Arial';
@@ -549,7 +550,14 @@ function drawDigits(ctx, value, x, y, minDigits = 1) {
 }
 
 function drawLabel(ctx, row, x, y) {
-  ctx.drawImage(assets.labels, 0, row * 8, 72, 8, x, y, 72, 8);
+  const metric = labelMetrics[row] ?? { left: 0, width: 72 };
+  ctx.drawImage(assets.labels, metric.left, row * 8, metric.width, 8, x, y, metric.width, 8);
+  return metric.width;
+}
+
+function drawCenteredLabel(ctx, row, y) {
+  const width = labelMetrics[row]?.width ?? 72;
+  return drawLabel(ctx, row, Math.round((CANVAS_WIDTH - width) / 2), y);
 }
 
 function drawTile(ctx, tileIndex, x, y) {
@@ -715,4 +723,39 @@ function loadImage(relativePath) {
     image.onerror = () => reject(new Error(`Failed to load ${relativePath}`));
     image.src = new URL(relativePath, import.meta.url).href;
   });
+}
+
+function measureLabelRows(image, rows) {
+  const canvas = document.createElement('canvas');
+  canvas.width = image.width;
+  canvas.height = image.height;
+  const context = canvas.getContext('2d', { willReadFrequently: true });
+  context.drawImage(image, 0, 0);
+  const metrics = [];
+
+  for (let row = 0; row < rows; row += 1) {
+    const y = row * 8;
+    const { data } = context.getImageData(0, y, image.width, 8);
+    let left = image.width;
+    let right = -1;
+
+    for (let pixelY = 0; pixelY < 8; pixelY += 1) {
+      for (let pixelX = 0; pixelX < image.width; pixelX += 1) {
+        const alpha = data[(pixelY * image.width + pixelX) * 4 + 3];
+        if (alpha === 0) {
+          continue;
+        }
+        left = Math.min(left, pixelX);
+        right = Math.max(right, pixelX);
+      }
+    }
+
+    metrics.push(
+      right >= left
+        ? { left, width: right - left + 1 }
+        : { left: 0, width: image.width }
+    );
+  }
+
+  return metrics;
 }
