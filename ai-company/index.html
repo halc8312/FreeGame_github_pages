@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="office-chat" content="disabled">
 <title>AI Company Office</title>
 <style>
   :root {
@@ -87,6 +88,16 @@
   .contact-draft, .contact-manual { display:block; width:100%; min-height:120px; padding:10px; margin:8px 0; resize:vertical; font:inherit; font-size:16px; line-height:1.6; color:var(--text); background:var(--bg); border:1px solid var(--line); border-radius:8px; }
   .contact-actions { display:flex; flex-wrap:wrap; gap:8px; }
   .contact-action { display:flex; align-items:center; justify-content:center; min-height:44px; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:var(--panel2); font-size:13px; cursor:pointer; }
+  .direct-chat { margin-bottom:14px; }
+  .chat-panel { padding:10px 0; }
+  .chat-log { max-height:42vh; overflow-y:auto; overscroll-behavior:contain; margin:12px 0; }
+  .chat-message { margin:8px 0; padding:10px; border-radius:8px; background:var(--bg); font-size:13px; line-height:1.7; overflow-wrap:anywhere; }
+  .chat-message.user { border-left:3px solid var(--accent2); }
+  .chat-message.assistant { border-left:3px solid var(--ok); }
+  .chat-message p { white-space:pre-wrap; }
+  .chat-meta { color:var(--dim); font-size:11px; margin-bottom:4px; }
+  .chat-draft { display:block; width:100%; min-height:96px; padding:10px; margin:8px 0; resize:vertical; font:inherit; font-size:16px; line-height:1.6; color:var(--text); background:var(--bg); border:1px solid var(--line); border-radius:8px; }
+  .chat-panel button:disabled { opacity:.55; cursor:default; }
 
   .wrap { max-width:1100px; margin:0 auto; padding:0 16px 48px; }
   h2 { font-size:15px; color:var(--accent); margin:28px 0 10px; letter-spacing:1px; line-height:1.6; }
@@ -261,6 +272,244 @@ function detailRow(label, value) {
 const SLACK_CHANNEL = 'https://w1787791233-h0f264551.slack.com/archives/C0C4GBMCC05';
 const SLACK_DEPARTMENTS = new Set(['executive', 'venture', 'market', 'eng', 'qa', 'finance', 'it', 'hr']);
 const contactDrafts = new Map(); // Memory only: closing a dialog keeps text; reloading clears it.
+// Only the authenticated relay replaces this marker. GitHub Pages stays API-free.
+const directChatEnabled = document.querySelector('meta[name="office-chat"]')?.content === 'same-origin';
+const directChatState = {draft:'', sending:false, uncertain:false, result:'', revision:0, loggingOut:false, authRevision:0};
+let disposeDirectChat = null;
+let notifyDirectChat = null;
+function canDirectChat(item) {
+  return directChatEnabled && item.slug === 'it' && item.kind === 'department' && item.provider === 'Devin';
+}
+function stopDirectChat() {
+  if (disposeDirectChat) disposeDirectChat();
+  disposeDirectChat = null;
+}
+function directChatSection() {
+  const section = node('section', 'direct-chat');
+  const toggle = node('button', 'contact-toggle chat-toggle', 'Officeで情シスと会話');
+  toggle.type = 'button';
+  toggle.setAttribute('aria-expanded', 'false');
+  toggle.setAttribute('aria-controls', 'chatPanel');
+  const panel = node('div', 'chat-panel'); panel.id = 'chatPanel'; panel.hidden = true;
+  const authStatus = node('p', 'contact-note');
+  const login = node('a', 'contact-action chat-login', 'GitHubでログイン');
+  login.href = '/auth/login'; login.hidden = true;
+  const retry = node('button', 'contact-action chat-retry', '接続を再確認'); retry.type = 'button'; retry.hidden = true;
+  const workspace = node('div', 'chat-workspace'); workspace.hidden = true;
+  const historyStatus = node('p', 'contact-note chat-history-status'); historyStatus.setAttribute('role', 'status');
+  const log = node('div', 'chat-log'); log.setAttribute('aria-label', '情シスとの会話履歴'); log.tabIndex = 0;
+  const draftLabel = node('label', 'contact-label', '情シスへのメッセージ'); draftLabel.setAttribute('for', 'chatDraft');
+  const draft = node('textarea', 'chat-draft'); draft.id = 'chatDraft'; draft.maxLength = 4000;
+  draft.value = directChatState.draft;
+  const send = node('button', 'contact-action chat-send', '送信'); send.type = 'button';
+  const refresh = node('button', 'contact-action chat-refresh', '履歴を再取得'); refresh.type = 'button';
+  const logout = node('button', 'contact-action chat-logout', 'ログアウト'); logout.type = 'button';
+  const feedback = node('p', 'contact-feedback chat-feedback'); feedback.setAttribute('role', 'status');
+  const acknowledge = node('button', 'contact-action chat-ack', '履歴を確認したので入力を再開');
+  acknowledge.type = 'button'; acknowledge.hidden = true;
+  const actions = node('div', 'contact-actions'); actions.append(send, refresh, logout);
+  workspace.append(historyStatus, log, draftLabel, draft, actions, feedback, acknowledge,
+    node('p', 'contact-note', '既存の情シスセッションに送ります。返信には時間がかかる場合があります。事業承認は従来のIssueで行ってください。下書きは再読み込みで消えます。'));
+  panel.append(authStatus, login, retry, workspace);
+  section.append(toggle, panel);
+  let disposed = false, timer = null, csrf = '', authPending = false, historyPending = false;
+  let historyChecked = false, lastHistorySignature = '';
+  const reads = new Set();
+  const active = () => !disposed && !panel.hidden && popup.open;
+  const visible = () => active() && !document.hidden;
+  function updateSendState() {
+    draft.value = directChatState.draft;
+    send.disabled = !csrf || directChatState.sending || directChatState.loggingOut || directChatState.uncertain || !draft.value.trim();
+    draft.disabled = directChatState.sending;
+    logout.disabled = directChatState.sending;
+    feedback.textContent = directChatState.sending ? '送信結果を確認しています。画面を閉じても再送しません。' : directChatState.result;
+    acknowledge.hidden = !directChatState.uncertain;
+    acknowledge.disabled = !historyChecked || directChatState.sending;
+  }
+  function clearPrivate() {
+    csrf = ''; log.replaceChildren(); lastHistorySignature = ''; historyChecked = false;
+    directChatState.draft = ''; draft.value = ''; workspace.hidden = true;
+    if (timer) clearTimeout(timer); timer = null;
+  }
+  function expired() {
+    clearPrivate(); login.hidden = false;
+    authStatus.textContent = 'ログインの有効期限が切れました。もう一度ログインしてください。';
+  }
+  async function request(url, options = {}, mutation = false) {
+    const controller = new AbortController();
+    if (!mutation) reads.add(controller);
+    const deadline = setTimeout(() => controller.abort(), 30000);
+    try {
+      const response = await fetch(url, {...options, credentials:'same-origin', cache:'no-store', signal:controller.signal});
+      let payload;
+      try { payload = await response.json(); } catch (_) { payload = {}; }
+      if (!response.ok) {
+        const error = new Error('chat_request_failed'); error.status = response.status; error.code = payload.error;
+        throw error;
+      }
+      return payload;
+    } finally { clearTimeout(deadline); reads.delete(controller); }
+  }
+  function schedule() {
+    if (timer) clearTimeout(timer);
+    timer = visible() && csrf ? setTimeout(refreshHistory, 20000) : null;
+  }
+  async function refreshHistory() {
+    if (!visible() || !csrf || historyPending || directChatState.loggingOut) return;
+    historyPending = true; refresh.disabled = true;
+    if (timer) clearTimeout(timer); timer = null;
+    const messages = new Map(), cursors = new Set();
+    const revision = directChatState.revision;
+    const authRevision = directChatState.authRevision;
+    let cursor = null, complete = false;
+    try {
+      // The API's final cursor is null. Every refresh is a bounded full scan.
+      for (let page = 0; page < 10; page++) {
+        const payload = await request('/api/chat/it/messages' + (cursor ? '?after=' + encodeURIComponent(cursor) : ''));
+        if (!active() || !csrf || authRevision !== directChatState.authRevision) return;
+        if (!Array.isArray(payload.messages) || typeof payload.hasMore !== 'boolean') throw new Error('invalid_history');
+        for (const message of payload.messages) {
+          if (typeof message.id !== 'string' || !['user', 'assistant'].includes(message.role) ||
+              typeof message.text !== 'string' || typeof message.createdAt !== 'string') throw new Error('invalid_message');
+          messages.set(message.id, message);
+        }
+        if (!payload.hasMore) { complete = true; break; }
+        if (typeof payload.nextCursor !== 'string' || !payload.nextCursor || cursors.has(payload.nextCursor)) throw new Error('invalid_cursor');
+        cursor = payload.nextCursor; cursors.add(cursor);
+      }
+      if (!active() || !csrf || authRevision !== directChatState.authRevision) return;
+      const sorted = [...messages.values()].sort((a,b) => (Date.parse(a.createdAt) || 0) - (Date.parse(b.createdAt) || 0) || a.id.localeCompare(b.id));
+      const shown = sorted.slice(-200), signature = JSON.stringify(shown);
+      if (signature !== lastHistorySignature) {
+        log.replaceChildren();
+        for (const message of shown) {
+          const entry = node('article', 'chat-message ' + message.role);
+          entry.append(node('div', 'chat-meta', (message.role === 'assistant' ? '情シスAI' : '利用者') + ' · ' + dateLabel(message.createdAt)),
+            node('p', '', message.text)); // Plain text only, including links and HTML.
+          log.append(entry);
+        }
+        lastHistorySignature = signature;
+      }
+      historyChecked = complete && !directChatState.sending && revision === directChatState.revision;
+      historyStatus.textContent = !complete ? '履歴が多いため一部のみ取得しました。最新の返信を取得できていない可能性があります。SlackまたはDevinでも確認してください。' :
+        sorted.length ? '履歴を確認しました（' + dateLabel(new Date().toISOString()) + '）。20秒ごとに確認します。' + (sorted.length > 200 ? ' 最新200件を表示しています。' : '') : 'このセッションの会話履歴はまだありません。';
+      updateSendState();
+    } catch (error) {
+      if (!active()) return;
+      historyChecked = false;
+      if (error.status === 401) expired();
+      else historyStatus.textContent = '履歴を取得できません。表示中の履歴は最新とは限りません。「履歴を再取得」で確認してください。';
+      updateSendState();
+    } finally {
+      historyPending = false;
+      if (active()) { refresh.disabled = false; schedule(); }
+    }
+  }
+  async function connect() {
+    if (!active() || authPending) return;
+    if (directChatState.loggingOut) { clearPrivate(); authStatus.textContent = 'ログアウトの完了を確認しています。'; return; }
+    const authRevision = directChatState.authRevision;
+    authPending = true; retry.hidden = true; login.hidden = true;
+    authStatus.textContent = '接続・ログイン状態を確認しています。';
+    try {
+      const session = await request('/api/chat/session');
+      if (!active() || authRevision !== directChatState.authRevision) return;
+      if (!session.enabled || session.department !== 'it') {
+        clearPrivate(); authStatus.textContent = 'Office内の会話は現在利用できません。下のSlackへの入口を利用してください。'; return;
+      }
+      if (!session.authenticated) {
+        clearPrivate(); login.hidden = false;
+        authStatus.textContent = '許可されたGitHubアカウントでログインすると、ここで送受信できます。'; return;
+      }
+      if (typeof session.csrfToken !== 'string' || !session.csrfToken || typeof session.user?.login !== 'string') throw new Error('invalid_auth');
+      csrf = session.csrfToken; workspace.hidden = false;
+      authStatus.textContent = session.user.login + ' としてログイン中';
+      updateSendState(); await refreshHistory();
+    } catch (error) {
+      if (!active()) return;
+      clearPrivate(); retry.hidden = false;
+      authStatus.textContent = 'チャットへの接続を確認できません。時間をおいて再確認してください。';
+    } finally { authPending = false; }
+  }
+  draft.addEventListener('input', () => { directChatState.draft = draft.value; updateSendState(); });
+  send.addEventListener('click', async () => {
+    const message = draft.value.trim();
+    if (!active() || !csrf || directChatState.sending || directChatState.loggingOut || directChatState.uncertain || !message) return;
+    if ([...message].length > 4000) { directChatState.result = 'メッセージは4,000文字以内で入力してください。'; updateSendState(); return; }
+    if (!globalThis.crypto?.randomUUID) { directChatState.result = 'このブラウザでは安全に送信できません。Slackへの入口を利用してください。'; updateSendState(); return; }
+    const token = csrf, requestId = crypto.randomUUID();
+    directChatState.sending = true; directChatState.revision++; historyChecked = false; updateSendState();
+    try {
+      const result = await request('/api/chat/it/messages', {method:'POST', headers:{'Content-Type':'application/json', 'X-CSRF-Token':token}, body:JSON.stringify({message, requestId})}, true);
+      if (result.state !== 'accepted') throw new Error('unconfirmed_send');
+      directChatState.result = '送信を受け付けました。これはAIの返信ではありません。履歴に返信が届くまでお待ちください。';
+      if (directChatState.draft.trim() === message) directChatState.draft = '';
+      if (active()) draft.value = directChatState.draft;
+    } catch (error) {
+      if (error.status === 401) {
+        directChatState.result = 'ログインが切れたため送信できませんでした。';
+        if (active()) expired();
+      } else if (['upstream_unavailable','delivery_failed','rate_limited','forbidden','chat_disabled','request_rejected','invalid_message','invalid_request'].includes(error.code)) {
+        directChatState.result = '送信されませんでした。接続・権限を確認し、時間をおいてから操作してください。';
+      } else {
+        directChatState.uncertain = true;
+        directChatState.result = '送信結果を確認できません。自動再送はしません。履歴で届いたか確認してから入力を再開してください。';
+      }
+    } finally {
+      directChatState.sending = false;
+      // A pending send may finish after its dialog was closed and reopened.
+      if (notifyDirectChat) await notifyDirectChat();
+    }
+  });
+  acknowledge.addEventListener('click', () => {
+    if (!active() || !historyChecked || directChatState.sending) return;
+    directChatState.uncertain = false;
+    directChatState.result = '履歴を確認済みです。届いていない場合だけ、必要なメッセージを送ってください。'; updateSendState();
+  });
+  logout.addEventListener('click', async () => {
+    if (!active() || !csrf || directChatState.sending || directChatState.loggingOut) return;
+    const token = csrf;
+    directChatState.loggingOut = true; directChatState.authRevision++;
+    clearPrivate(); login.hidden = true; retry.hidden = true;
+    authStatus.textContent = 'ログアウトの完了を確認しています。';
+    for (const controller of reads) controller.abort();
+    let outcome = 'logout-failed';
+    try {
+      await request('/auth/logout', {method:'POST', headers:{'X-CSRF-Token':token}}, true);
+      outcome = 'logged-out';
+    } catch (error) {
+      if (error.status === 401) outcome = 'logged-out';
+    } finally {
+      directChatState.loggingOut = false; directChatState.draft = '';
+      directChatState.result = ''; directChatState.uncertain = false; contactDrafts.clear();
+      if (notifyDirectChat) await notifyDirectChat(outcome);
+    }
+  });
+  refresh.addEventListener('click', refreshHistory); retry.addEventListener('click', connect);
+  toggle.addEventListener('click', () => {
+    panel.hidden = !panel.hidden; toggle.setAttribute('aria-expanded', String(!panel.hidden));
+    if (panel.hidden) { if (timer) clearTimeout(timer); timer = null; }
+    else if (csrf) refreshHistory(); else connect();
+  });
+  const onVisibility = () => { if (visible() && csrf) refreshHistory(); else if (timer) { clearTimeout(timer); timer = null; } };
+  document.addEventListener('visibilitychange', onVisibility);
+  const notify = async reason => {
+    if (disposed) return;
+    if (reason === 'logged-out' || reason === 'logout-failed') {
+      clearPrivate(); login.hidden = reason !== 'logged-out'; retry.hidden = reason !== 'logout-failed';
+      authStatus.textContent = reason === 'logged-out' ? 'ログアウトしました。' : 'ログアウトを確認できません。接続を再確認し、もう一度ログアウトしてください。';
+    } else if (active()) { updateSendState(); await refreshHistory(); }
+  };
+  notifyDirectChat = notify;
+  disposeDirectChat = () => {
+    disposed = true; if (timer) clearTimeout(timer);
+    for (const controller of reads) controller.abort();
+    document.removeEventListener('visibilitychange', onVisibility);
+    if (notifyDirectChat === notify) notifyDirectChat = null;
+    log.replaceChildren(); csrf = '';
+  };
+  return section;
+}
 function contactRoute(item) {
   if (item.slug === 'chatgpt' && item.kind === 'collaborator' && item.provider === 'ChatGPT') {
     return {prefix:'[chatgpt] Officeからの相談', label:'GitHubで依頼を作る ↗',
@@ -277,12 +526,14 @@ function contactRoute(item) {
 }
 function contactSection(item) {
   const section = node('section', 'contact');
+  const direct = canDirectChat(item);
+  if (direct) section.append(directChatSection());
   const route = contactRoute(item);
   if (!route) {
     section.append(node('p', 'contact-note', 'この担当の会話先は未設定です。'));
     return section;
   }
-  const toggle = node('button', 'contact-toggle', '話しかける');
+  const toggle = node('button', 'contact-toggle', direct ? 'Slackで話しかける' : '話しかける');
   toggle.type = 'button';
   toggle.setAttribute('aria-expanded', 'false');
   toggle.setAttribute('aria-controls', 'contactPanel');
@@ -345,6 +596,7 @@ function contactSection(item) {
   return section;
 }
 function openDept(item, trigger, sourceError) {
+  stopDirectChat();
   returnFocus = trigger;
   const body = document.getElementById('popupBody');
   body.replaceChildren();
@@ -379,7 +631,7 @@ function openDept(item, trigger, sourceError) {
   close.focus();
 }
 popup.addEventListener('click', event => { if (event.target === popup) popup.close(); });
-popup.addEventListener('close', () => { if (returnFocus && returnFocus.isConnected) returnFocus.focus(); });
+popup.addEventListener('close', () => { stopDirectChat(); if (returnFocus && returnFocus.isConnected) returnFocus.focus(); });
 
 function renderMarkers(depts, sourceError) {
   const markers = document.getElementById('markers');
