@@ -175,8 +175,8 @@
 <script>
 'use strict';
 const STATUS = {
-  reported: {label:'当日報告あり', color:'var(--ok)'},
-  no_report: {label:'報告未確認', color:'var(--idle)'},
+  reported: {label:'本日活動あり', color:'var(--ok)'},
+  no_report: {label:'本日の記録なし', color:'var(--idle)'},
   alert: {label:'要対応', color:'var(--alert)'},
   unknown: {label:'取得不明', color:'var(--unknown)'}
 };
@@ -262,6 +262,11 @@ function openDept(item, trigger, sourceError) {
     detailRow('未完了の担当issue' + (sourceError ? '（前回取得値を含む）' : ''), taskLabel(item.openTasks)),
     detailRow('次の予定', item.next || '未確認'),
     detailRow('最終報告', dateLabel(item.lastReport)));
+  if (item.lastActiveAt) body.append(detailRow('最終活動', dateLabel(item.lastActiveAt)));
+  if (Number.isInteger(item.commitsToday) && item.commitsToday > 0)
+    body.append(detailRow('本日のコミット', item.commitsToday + '件'));
+  if (Number.isInteger(item.pendingHuman) && item.pendingHuman > 0)
+    body.append(detailRow('halcy確認待ち', item.pendingHuman + '件（下の「人間の対応事項」に一覧あり）'));
   if (safeUrl(item.reportUrl)) {
     const row = node('div', 'row');
     row.append(linkOrText('→ 最新の報告を開く', item.reportUrl));
@@ -318,7 +323,7 @@ function renderBoard(depts) {
   donut.setAttribute('aria-hidden', 'true');
   if (depts.length) donut.style.background = 'conic-gradient(' + segments.join(',') + ')';
   chart.append(donut, legend);
-  board.append(cards, chart, node('p', 'note', '当日＝JST。報告・issueに基づく分類で、実行中を表すものではありません。'));
+  board.append(cards, chart, node('p', 'note', '当日＝JST。報告・コミット・issueに基づく分類で、実行中を表すものではありません。'));
 }
 function renderCollaborators(items, sourceError) {
   const area = document.getElementById('collaborators');
