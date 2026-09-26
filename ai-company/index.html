@@ -15,7 +15,7 @@
   body { background:var(--bg); color:var(--text); font-family:-apple-system,"Hiragino Kaku Gothic ProN",sans-serif; }
   button { font:inherit; color:inherit; }
   button, a { -webkit-tap-highlight-color:transparent; }
-  button:focus-visible, a:focus-visible, .map-scroll:focus-visible { outline:3px solid var(--accent2); outline-offset:4px; }
+  button:focus-visible, a:focus-visible, textarea:focus-visible, .map-scroll:focus-visible { outline:3px solid var(--accent2); outline-offset:4px; }
   a { overflow-wrap:anywhere; }
   .top { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 20px 10px; }
   .top h1 { font-size:18px; letter-spacing:2px; }
@@ -78,6 +78,15 @@
   .popup .lbl { font-size:10px; color:var(--dim); letter-spacing:1px; }
   .popup .close { position:absolute; top:7px; right:7px; width:36px; height:36px; border:0; border-radius:8px; background:transparent; color:var(--dim); font-size:24px; cursor:pointer; }
   .popup a { color:var(--accent2); text-decoration:none; }
+  .popup .head > div { min-width:0; overflow-wrap:anywhere; }
+  .contact { margin:16px 0; border-top:1px solid var(--line); padding-top:14px; }
+  .contact-toggle { width:100%; min-height:44px; padding:10px 12px; border:1px solid var(--accent2); border-radius:8px; background:var(--panel2); cursor:pointer; }
+  .contact-panel { padding-top:12px; }
+  .contact-note, .contact-feedback { color:var(--dim); font-size:12px; line-height:1.8; margin:8px 0; overflow-wrap:anywhere; }
+  .contact-label { display:block; font-size:13px; margin-top:12px; }
+  .contact-draft, .contact-manual { display:block; width:100%; min-height:120px; padding:10px; margin:8px 0; resize:vertical; font:inherit; font-size:16px; line-height:1.6; color:var(--text); background:var(--bg); border:1px solid var(--line); border-radius:8px; }
+  .contact-actions { display:flex; flex-wrap:wrap; gap:8px; }
+  .contact-action { display:flex; align-items:center; justify-content:center; min-height:44px; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:var(--panel2); font-size:13px; cursor:pointer; }
 
   .wrap { max-width:1100px; margin:0 auto; padding:0 16px 48px; }
   h2 { font-size:15px; color:var(--accent); margin:28px 0 10px; letter-spacing:1px; line-height:1.6; }
@@ -141,7 +150,7 @@
 
 <main>
 <div class="mapwrap">
-  <p class="map-hint" id="mapHint">席のアイコンを選ぶと部署の詳細が開きます。狭い画面ではマップを左右にスワイプできます。キーボードでも部署を選べます。</p>
+  <p class="map-hint" id="mapHint">席のアイコンから詳細・「話しかける」を開けます。狭い画面ではマップを左右にスワイプできます。キーボードでも部署を選べます。</p>
   <div class="map-scroll" tabindex="0" aria-label="オフィスマップ。各部署を選ぶと詳細が開きます。" aria-describedby="mapHint">
     <div class="floor">
       <img class="map" src="assets/office-map.png" width="1536" height="1024" alt="AI Companyのオフィス見取り図">
@@ -248,6 +257,93 @@ function detailRow(label, value) {
   row.append(node('div', 'lbl', label), node('div', '', value));
   return row;
 }
+// Only known routes may prepare messages. Payload URLs never choose a recipient.
+const SLACK_CHANNEL = 'https://w1787791233-h0f264551.slack.com/archives/C0C4GBMCC05';
+const SLACK_DEPARTMENTS = new Set(['executive', 'venture', 'market', 'eng', 'qa', 'finance', 'it', 'hr']);
+const contactDrafts = new Map(); // Memory only: closing a dialog keeps text; reloading clears it.
+function contactRoute(item) {
+  if (item.slug === 'chatgpt' && item.kind === 'collaborator' && item.provider === 'ChatGPT') {
+    return {prefix:'[chatgpt] Officeからの相談', label:'GitHubで依頼を作る ↗',
+      url:'https://github.com/halc8312/ai-company/issues/new?title=' + encodeURIComponent('[chatgpt] Officeからの相談'),
+      note:'コピーした文面を、このプロジェクトのWork会話に貼り付けてください。GitHubに依頼を残す場合は、下のリンクから本文へ貼り付けて投稿できます。Issueは巡回時に確認するため即時返信ではありません。'};
+  }
+  if (item.kind !== 'department' || item.provider !== 'Devin') return null;
+  if (item.slug === 'digest') return {prefix:'dept:executive\n日次ダイジェスト担当への相談です。',
+    label:'Slack #ai-companyを開く ↗', url:SLACK_CHANNEL,
+    note:'日次ダイジェストへの相談は経営企画室へ送ります。コピーした文面をSlack #ai-companyに貼り付けて投稿してください。日次ダイジェスト担当の直接起動ではありません。'};
+  if (!SLACK_DEPARTMENTS.has(item.slug)) return null;
+  return {prefix:'dept:' + item.slug, label:'Slack #ai-companyを開く ↗', url:SLACK_CHANNEL,
+    note:'コピーした文面をSlack #ai-companyに貼り付けて投稿してください。宛先のdept指定はコピー時に付きます。ログイン・チャンネルへの参加が必要です。'};
+}
+function contactSection(item) {
+  const section = node('section', 'contact');
+  const route = contactRoute(item);
+  if (!route) {
+    section.append(node('p', 'contact-note', 'この担当の会話先は未設定です。'));
+    return section;
+  }
+  const toggle = node('button', 'contact-toggle', '話しかける');
+  toggle.type = 'button';
+  toggle.setAttribute('aria-expanded', 'false');
+  toggle.setAttribute('aria-controls', 'contactPanel');
+  const panel = node('div', 'contact-panel');
+  panel.id = 'contactPanel';
+  panel.hidden = true;
+  const label = node('label', 'contact-label', item.name + 'への質問・依頼');
+  label.setAttribute('for', 'contactDraft');
+  const draft = node('textarea', 'contact-draft');
+  draft.id = 'contactDraft';
+  draft.placeholder = '相談したいこと、頼みたいことを書いてください';
+  draft.value = contactDrafts.get(item.slug) || '';
+  const note = node('p', 'contact-note', route.note);
+  note.id = 'contactNote';
+  draft.setAttribute('aria-describedby', 'contactNote');
+  const feedback = node('p', 'contact-feedback', '下書き・未送信。返信と受領状況は会話先で確認してください。');
+  feedback.setAttribute('role', 'status');
+  const manual = node('textarea', 'contact-manual');
+  manual.readOnly = true;
+  manual.hidden = true;
+  manual.setAttribute('aria-label', '宛先付きの文面。全選択して手動でコピーしてください');
+  const copy = node('button', 'contact-action', '1. 宛先付きでコピー');
+  copy.type = 'button';
+  draft.addEventListener('input', () => {
+    contactDrafts.set(item.slug, draft.value);
+    manual.hidden = true;
+    feedback.textContent = '下書き・未送信。編集後はもう一度コピーしてください。';
+  });
+  copy.addEventListener('click', async () => {
+    if (!draft.value.trim()) {
+      feedback.textContent = '質問・依頼を入力してください。';
+      draft.focus();
+      return;
+    }
+    const message = route.prefix + '\n\n' + draft.value.trim();
+    manual.hidden = true;
+    try {
+      await navigator.clipboard.writeText(message);
+      feedback.textContent = 'コピーしました。まだ送信されていません。会話先に貼り付けて投稿してください。';
+    } catch (_) {
+      manual.value = message;
+      manual.hidden = false;
+      manual.focus();
+      manual.select();
+      feedback.textContent = '自動コピーできませんでした。下の宛先付き文面を手動でコピーしてください。まだ送信されていません。';
+    }
+  });
+  const open = linkOrText('2. ' + route.label, route.url, 'contact-action');
+  open.target = '_blank';
+  const actions = node('div', 'contact-actions');
+  actions.append(copy, open);
+  panel.append(note, label, draft, actions, feedback, manual,
+    node('p', 'contact-note', '投稿先の参加者・公開範囲を確認してください。下書きはページを閉じる・再読み込みすると消えます。'));
+  toggle.addEventListener('click', () => {
+    panel.hidden = !panel.hidden;
+    toggle.setAttribute('aria-expanded', String(!panel.hidden));
+    if (!panel.hidden) draft.focus();
+  });
+  section.append(toggle, panel);
+  return section;
+}
 function openDept(item, trigger, sourceError) {
   returnFocus = trigger;
   const body = document.getElementById('popupBody');
@@ -263,7 +359,7 @@ function openDept(item, trigger, sourceError) {
   title.id = 'popupTitle';
   info.append(title, node('div', 'role', item.role), node('div', 'role', item.provider), badge(item));
   head.append(avatar(item), info);
-  body.append(close, head,
+  body.append(close, head, contactSection(item),
     detailRow('最新の報告・対応内容', item.now || '報告未確認'),
     detailRow('未完了の担当issue' + (sourceError ? '（前回取得値を含む）' : ''), taskLabel(item.openTasks)),
     detailRow('次の予定', item.next || '未確認'),
