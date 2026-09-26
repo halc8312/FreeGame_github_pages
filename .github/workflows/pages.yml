@@ -35,6 +35,8 @@ jobs:
           mkdir -p dist
           cp index.html dist/
           cp -R css js dist/
+          # AI Company office dashboard (data.json/UI pushed by update.py --publish-site)
+          if [ -d ai-company ]; then cp -R ai-company dist/; fi
           png_files=( *.png )
           if [ ${#png_files[@]} -gt 0 ]; then
             cp "${png_files[@]}" dist/
