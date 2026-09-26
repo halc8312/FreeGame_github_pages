@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-09-26 17:30 JST",
-  "githubOkAt": "2026-09-26 17:30 JST",
+  "generatedAt": "2026-09-26 17:31 JST",
+  "githubOkAt": "2026-09-26 17:31 JST",
   "fetchError": null,
   "depts": [
     {
@@ -117,7 +117,7 @@
       "num": 27,
       "title": "[TEST] オフィス回答経路の疎通確認",
       "dept": "it",
-      "state": "waiting",
+      "state": "answered",
       "body": "テスト用。後で閉じます。\n\n候補:\n- 候補A そのまま進める\n- 候補B 中止する\n- 候補C もう少し情報がほしい",
       "options": [
         "候補A そのまま進める",
@@ -248,12 +248,6 @@
           "name": "type:task",
           "description": "",
           "color": "1d4ed8"
-        },
-        {
-          "id": "LA_kwDOUrsJas8AAAAC4XoHkg",
-          "name": "needs-human",
-          "description": "",
-          "color": "dc2626"
         }
       ],
       "number": 27,
@@ -314,12 +308,6 @@
           "name": "type:task",
           "description": "",
           "color": "1d4ed8"
-        },
-        {
-          "id": "LA_kwDOUrsJas8AAAAC4XoHkg",
-          "name": "needs-human",
-          "description": "",
-          "color": "dc2626"
         }
       ],
       "number": 14,
