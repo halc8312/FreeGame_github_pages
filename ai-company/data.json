@@ -1,0 +1,421 @@
+{
+  "generatedAt": "2026-09-26 17:00 JST",
+  "githubOkAt": "2026-09-26 17:00 JST",
+  "fetchError": null,
+  "depts": [
+    {
+      "slug": "executive",
+      "name": "経営企画室",
+      "role": "経営戦略・優先度決定・新規事業ゲート審査",
+      "status": "alert",
+      "now": "2026-09-26 経営企画室 判断メモ(第2巡回・全体ミーティング初回開催指示)",
+      "next": "担当issue 4件",
+      "lastReport": "2026-09-26",
+      "reportPath": "decisions/2026-09-26-patrol-2.md",
+      "openTasks": 4,
+      "activity": 0.2857142857142857
+    },
+    {
+      "slug": "venture",
+      "name": "新規事業開発部",
+      "role": "事業アイデア発掘・検証・提案書作成",
+      "status": "working",
+      "now": "却下アイデア一覧(新規事業開発部)",
+      "next": "次の定時巡回",
+      "lastReport": "2026-09-26",
+      "reportPath": "reports/venture/rejected-ideas.md",
+      "openTasks": 0,
+      "activity": 0.14285714285714285
+    },
+    {
+      "slug": "market",
+      "name": "市場調査・マーケ部",
+      "role": "トレンド・競合・需要の調査",
+      "status": "working",
+      "now": "トレンド巡回 2026-09-26 (市場調査・マーケティング部)",
+      "next": "次の定時巡回",
+      "lastReport": "2026-09-26",
+      "reportPath": "reports/market/2026-09-26-trends.md",
+      "openTasks": 0,
+      "activity": 0.42857142857142855
+    },
+    {
+      "slug": "engineering",
+      "name": "製品開発部",
+      "role": "承認案件のプロトタイプ・MVP開発",
+      "status": "idle",
+      "now": "次の巡回を待機中",
+      "next": "次の定時巡回",
+      "lastReport": "-",
+      "reportPath": "",
+      "openTasks": 0,
+      "activity": 0.0
+    },
+    {
+      "slug": "qa",
+      "name": "品質管理・監査部",
+      "role": "PR/成果物レビュー・部門活動監査",
+      "status": "working",
+      "now": "QA ステータスログ(巡回末尾に1行追記・#4 社長決裁による運用)",
+      "next": "次の定時巡回",
+      "lastReport": "2026-09-26",
+      "reportPath": "reports/qa/status.md",
+      "openTasks": 0,
+      "activity": 0.2857142857142857
+    },
+    {
+      "slug": "finance",
+      "name": "財務・管理部",
+      "role": "利用量・コスト・承認待ちの棚卸し",
+      "status": "working",
+      "now": "利用量日報 2026-09-26 (財務・管理部)",
+      "next": "次の定時巡回",
+      "lastReport": "2026-09-26",
+      "reportPath": "reports/finance/usage-2026-09-26.md",
+      "openTasks": 0,
+      "activity": 0.14285714285714285
+    },
+    {
+      "slug": "it",
+      "name": "情報システム部",
+      "role": "オートメーション健全性・環境整備",
+      "status": "alert",
+      "now": "情報システム部 巡回レポート 2026-09-26 (05:40 UTC / 14:40 JST・巡回3)",
+      "next": "次の定時巡回",
+      "lastReport": "2026-09-26",
+      "reportPath": "reports/it/2026-09-26-patrol-3.md",
+      "openTasks": 0,
+      "activity": 0.5714285714285714
+    },
+    {
+      "slug": "hr",
+      "name": "人事・組織開発部",
+      "role": "生産性監視・運用改善提案",
+      "status": "working",
+      "now": "2026-09-26 人事・組織開発部 巡回報告(第2回)",
+      "next": "次の定時巡回",
+      "lastReport": "2026-09-26",
+      "reportPath": "reports/hr/2026-09-26-patrol-2.md",
+      "openTasks": 0,
+      "activity": 0.2857142857142857
+    },
+    {
+      "slug": "digest",
+      "name": "日次ダイジェスト",
+      "role": "毎晩の全社活動まとめ",
+      "status": "idle",
+      "now": "次の巡回を待機中",
+      "next": "次の定時巡回",
+      "lastReport": "-",
+      "reportPath": "",
+      "openTasks": 0,
+      "activity": 0.0
+    }
+  ],
+  "needsHuman": [
+    {
+      "num": 19,
+      "title": "[it] office ダッシュボードのデプロイがネットワークポリシーでブロックされる",
+      "dept": "it",
+      "state": "waiting"
+    },
+    {
+      "num": 14,
+      "title": "[情報依頼] 既存iOSアプリの一覧と直近DL/収益の共有をお願いします",
+      "dept": "executive",
+      "state": "answered"
+    },
+    {
+      "num": 5,
+      "title": "[財務] devin_session_search が 403 (org.sessions.view 不足) で利用量集計不能",
+      "dept": "executive",
+      "state": "answered"
+    },
+    {
+      "num": 4,
+      "title": "[情シス] 常駐セッション健全性チェック不能: devin_session_search が 403 (org.sessions.view 権限不足)",
+      "dept": "it",
+      "state": "answered"
+    }
+  ],
+  "proposals": [
+    {
+      "num": 13,
+      "title": "[提案] 歌ってみた制作管理ボード iOSアプリ utamita-board",
+      "dept": "executive"
+    },
+    {
+      "num": 6,
+      "title": "[提案] 歌ってみた即日・低価格 簡易MIX代行(UTA Studio エンジン流用) utamix-express",
+      "dept": "executive"
+    }
+  ],
+  "reports": [
+    {
+      "dept": "経営企画室",
+      "title": "2026-09-26 経営企画室 判断メモ(第2巡回・全体ミーティング初回開催指示)",
+      "date": "2026-09-26",
+      "url": "https://github.com/halc8312/ai-company/blob/main/decisions/2026-09-26-patrol-2.md"
+    },
+    {
+      "dept": "新規事業開発部",
+      "title": "却下アイデア一覧(新規事業開発部)",
+      "date": "2026-09-26",
+      "url": "https://github.com/halc8312/ai-company/blob/main/reports/venture/rejected-ideas.md"
+    },
+    {
+      "dept": "市場調査・マーケ部",
+      "title": "トレンド巡回 2026-09-26 (市場調査・マーケティング部)",
+      "date": "2026-09-26",
+      "url": "https://github.com/halc8312/ai-company/blob/main/reports/market/2026-09-26-trends.md"
+    },
+    {
+      "dept": "品質管理・監査部",
+      "title": "QA ステータスログ(巡回末尾に1行追記・#4 社長決裁による運用)",
+      "date": "2026-09-26",
+      "url": "https://github.com/halc8312/ai-company/blob/main/reports/qa/status.md"
+    },
+    {
+      "dept": "財務・管理部",
+      "title": "利用量日報 2026-09-26 (財務・管理部)",
+      "date": "2026-09-26",
+      "url": "https://github.com/halc8312/ai-company/blob/main/reports/finance/usage-2026-09-26.md"
+    },
+    {
+      "dept": "情報システム部",
+      "title": "情報システム部 巡回レポート 2026-09-26 (05:40 UTC / 14:40 JST・巡回3)",
+      "date": "2026-09-26",
+      "url": "https://github.com/halc8312/ai-company/blob/main/reports/it/2026-09-26-patrol-3.md"
+    },
+    {
+      "dept": "人事・組織開発部",
+      "title": "2026-09-26 人事・組織開発部 巡回報告(第2回)",
+      "date": "2026-09-26",
+      "url": "https://github.com/halc8312/ai-company/blob/main/reports/hr/2026-09-26-patrol-2.md"
+    }
+  ],
+  "_allIssues": [
+    {
+      "labels": [
+        {
+          "id": "LA_kwDOUrsJas8AAAAC4XoC7g",
+          "name": "dept:it",
+          "description": "",
+          "color": "64748b"
+        },
+        {
+          "id": "LA_kwDOUrsJas8AAAAC4XoEvw",
+          "name": "type:alert",
+          "description": "",
+          "color": "dc2626"
+        },
+        {
+          "id": "LA_kwDOUrsJas8AAAAC4XoHkg",
+          "name": "needs-human",
+          "description": "",
+          "color": "dc2626"
+        }
+      ],
+      "number": 19,
+      "title": "[it] office ダッシュボードのデプロイがネットワークポリシーでブロックされる"
+    },
+    {
+      "labels": [
+        {
+          "id": "LA_kwDOUrsJas8AAAAC4XoAoA",
+          "name": "dept:executive",
+          "description": "",
+          "color": "8b5cf6"
+        },
+        {
+          "id": "LA_kwDOUrsJas8AAAAC4XoDdA",
+          "name": "type:task",
+          "description": "",
+          "color": "1d4ed8"
+        }
+      ],
+      "number": 16,
+      "title": "[運用改善] needs-human状態分離・事業承認と資料保存の分離・KPI追加"
+    },
+    {
+      "labels": [
+        {
+          "id": "LA_kwDOUrsJas8AAAAC4XoAoA",
+          "name": "dept:executive",
+          "description": "",
+          "color": "8b5cf6"
+        },
+        {
+          "id": "LA_kwDOUrsJas8AAAAC4XoDdA",
+          "name": "type:task",
+          "description": "",
+          "color": "1d4ed8"
+        },
+        {
+          "id": "LA_kwDOUrsJas8AAAAC4XoHkg",
+          "name": "needs-human",
+          "description": "",
+          "color": "dc2626"
+        }
+      ],
+      "number": 14,
+      "title": "[情報依頼] 既存iOSアプリの一覧と直近DL/収益の共有をお願いします"
+    },
+    {
+      "labels": [
+        {
+          "id": "LA_kwDOUrsJas8AAAAC4XoAoA",
+          "name": "dept:executive",
+          "description": "",
+          "color": "8b5cf6"
+        },
+        {
+          "id": "LA_kwDOUrsJas8AAAAC4XoDzA",
+          "name": "type:proposal",
+          "description": "",
+          "color": "7c3aed"
+        },
+        {
+          "id": "LA_kwDOUrsJas8AAAAC4XoFSA",
+          "name": "status:approved",
+          "description": "",
+          "color": "16a34a"
+        },
+        {
+          "id": "LA_kwDOUrsJas8AAAAC4XoHHg",
+          "name": "dev-ready",
+          "description": "",
+          "color": "059669"
+        }
+      ],
+      "number": 13,
+      "title": "[提案] 歌ってみた制作管理ボード iOSアプリ utamita-board"
+    },
+    {
+      "labels": [
+        {
+          "id": "LA_kwDOUrsJas8AAAAC4XoAoA",
+          "name": "dept:executive",
+          "description": "",
+          "color": "8b5cf6"
+        },
+        {
+          "id": "LA_kwDOUrsJas8AAAAC4XoDdA",
+          "name": "type:task",
+          "description": "",
+          "color": "1d4ed8"
+        }
+      ],
+      "number": 11,
+      "title": "【人事提案】提案書の着地ルール未定義により審査対象が main に存在しない状態になった"
+    },
+    {
+      "labels": [
+        {
+          "id": "LA_kwDOUrsJas8AAAAC4XoAoA",
+          "name": "dept:executive",
+          "description": "",
+          "color": "8b5cf6"
+        },
+        {
+          "id": "LA_kwDOUrsJas8AAAAC4XoB-Q",
+          "name": "dept:qa",
+          "description": "",
+          "color": "eab308"
+        },
+        {
+          "id": "LA_kwDOUrsJas8AAAAC4XoDzA",
+          "name": "type:proposal",
+          "description": "",
+          "color": "7c3aed"
+        },
+        {
+          "id": "LA_kwDOUrsJas8AAAAC4XoFSA",
+          "name": "status:approved",
+          "description": "",
+          "color": "16a34a"
+        },
+        {
+          "id": "LA_kwDOUrsJas8AAAAC4XoGag",
+          "name": "status:review",
+          "description": "",
+          "color": "d97706"
+        },
+        {
+          "id": "LA_kwDOUrsJas8AAAAC4XoHHg",
+          "name": "dev-ready",
+          "description": "",
+          "color": "059669"
+        }
+      ],
+      "number": 6,
+      "title": "[提案] 歌ってみた即日・低価格 簡易MIX代行(UTA Studio エンジン流用) utamix-express"
+    },
+    {
+      "labels": [
+        {
+          "id": "LA_kwDOUrsJas8AAAAC4XoAoA",
+          "name": "dept:executive",
+          "description": "",
+          "color": "8b5cf6"
+        },
+        {
+          "id": "LA_kwDOUrsJas8AAAAC4XoC7g",
+          "name": "dept:it",
+          "description": "",
+          "color": "64748b"
+        },
+        {
+          "id": "LA_kwDOUrsJas8AAAAC4XoEvw",
+          "name": "type:alert",
+          "description": "",
+          "color": "dc2626"
+        },
+        {
+          "id": "LA_kwDOUrsJas8AAAAC4XoHkg",
+          "name": "needs-human",
+          "description": "",
+          "color": "dc2626"
+        }
+      ],
+      "number": 5,
+      "title": "[財務] devin_session_search が 403 (org.sessions.view 不足) で利用量集計不能"
+    },
+    {
+      "labels": [
+        {
+          "id": "LA_kwDOUrsJas8AAAAC4XoC7g",
+          "name": "dept:it",
+          "description": "",
+          "color": "64748b"
+        },
+        {
+          "id": "LA_kwDOUrsJas8AAAAC4XoHkg",
+          "name": "needs-human",
+          "description": "",
+          "color": "dc2626"
+        }
+      ],
+      "number": 4,
+      "title": "[情シス] 常駐セッション健全性チェック不能: devin_session_search が 403 (org.sessions.view 権限不足)"
+    },
+    {
+      "labels": [
+        {
+          "id": "LA_kwDOUrsJas8AAAAC4XoAoA",
+          "name": "dept:executive",
+          "description": "",
+          "color": "8b5cf6"
+        },
+        {
+          "id": "LA_kwDOUrsJas8AAAAC4XoDdA",
+          "name": "type:task",
+          "description": "",
+          "color": "1d4ed8"
+        }
+      ],
+      "number": 3,
+      "title": "【人事提案】常駐セッションのツール未反映(Slack)を仕組みで防ぐ: 権限変更時の再起動ルール化"
+    }
+  ]
+}
