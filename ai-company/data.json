@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-09-26 18:23 JST",
-  "githubOkAt": "2026-09-26 18:23 JST",
+  "generatedAt": "2026-09-26 18:24 JST",
+  "githubOkAt": "2026-09-26 18:24 JST",
   "fetchError": null,
   "depts": [
     {
@@ -138,44 +138,6 @@
         "UI 検証を後回しにして v1 残り実装(エクスポート等)を先に進める",
         "見送る(本案件を一時保留)"
       ]
-    },
-    {
-      "num": 28,
-      "title": "[監査] オフィス回答中継(webhook.site)が無認証 — halcy回答のなりすまし投稿が可能",
-      "dept": "it",
-      "state": "answered",
-      "body": "[品質管理・監査部 / 監査発見 — 決裁パイプラインの完全性]\n\n## 事実(検証済み)\n- commit 6967891 で `office/index.html` の回答ボタンが `POST https://webhook.site/432ecc01-...` に `{issue, answer}` を送信し、`office/update.py` の `ingest_answers()` がそれを「**[オフィス経由でhalcyが回答]**」として issue コメント化 + needs-human ラベル自動除去する\n- この中継は**認証なし**: 正しい形式の JSON を POS",
-      "options": [
-        "案3を採用(ボタンをGitHubコメントURL生成に置き換え、中継廃止)",
-        "案1を採用(回答は未検証扱い・部署が二重確認してから処理)",
-        "案2を採用(共有秘密を回答JSONに含め照合)",
-        "詳細な情報がほしい"
-      ]
-    },
-    {
-      "num": 5,
-      "title": "[財務] devin_session_search が 403 (org.sessions.view 不足) で利用量集計不能",
-      "dept": "executive",
-      "state": "answered",
-      "body": "依頼元: 財務・管理部\n\n## 事象(検証済み)\n財務部の常駐セッション(automation auto-c7ca576515b341c78deab752b6ee54b8、実行主体 `automation-service`)で `devin_session_search` を呼ぶと:\n\n`HTTP 403 Forbidden ... Missing required permission 'org.sessions.view' on this organization`\n\nこのため、チャーター上の日次業務(部署別セッション実行回数・概算コスト・失敗数の集計、消費急増・連続失敗の異常検知)が**",
-      "options": [
-        "org.sessions.view 権限を付与する",
-        "run_as を creator に変更する",
-        "権限は付与しない(GitHub活動ベースの代替集計で運用)",
-        "詳細な情報がほしい"
-      ]
-    },
-    {
-      "num": 4,
-      "title": "[情シス] 常駐セッション健全性チェック不能: devin_session_search が 403 (org.sessions.view 権限不足)",
-      "dept": "it",
-      "state": "answered",
-      "body": "## 状況(検証済み)\n情報システム部の巡回で `devin_session_search` を呼ぶと以下で失敗します:\n\n```\nHTTP 403 Forbidden GET /v3/organizations/org_GX0CIZyddIQvnMPx/sessions\nMissing required permission 'org.sessions.view' on this organization\n```\n\nオートメーション自体は `devin_automation_manage` で確認でき、全10件 enabled・直近invocation succeeded(02:32 UTC",
-      "options": [
-        "org.sessions.view 権限を付与する",
-        "権限は付与しない(reports/の1行ステータス代替運用)",
-        "詳細な情報がほしい"
-      ]
     }
   ],
   "proposals": [
@@ -294,12 +256,6 @@
         {
           "id": "LA_kwDOUrsJas8AAAAC4XoEvw",
           "name": "type:alert",
-          "description": "",
-          "color": "dc2626"
-        },
-        {
-          "id": "LA_kwDOUrsJas8AAAAC4XoHkg",
-          "name": "needs-human",
           "description": "",
           "color": "dc2626"
         }
@@ -440,12 +396,6 @@
           "name": "type:alert",
           "description": "",
           "color": "dc2626"
-        },
-        {
-          "id": "LA_kwDOUrsJas8AAAAC4XoHkg",
-          "name": "needs-human",
-          "description": "",
-          "color": "dc2626"
         }
       ],
       "number": 5,
@@ -458,12 +408,6 @@
           "name": "dept:it",
           "description": "",
           "color": "64748b"
-        },
-        {
-          "id": "LA_kwDOUrsJas8AAAAC4XoHkg",
-          "name": "needs-human",
-          "description": "",
-          "color": "dc2626"
         }
       ],
       "number": 4,
