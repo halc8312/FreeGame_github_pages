@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-09-26 17:32 JST",
-  "githubOkAt": "2026-09-26 17:32 JST",
+  "generatedAt": "2026-09-26 18:01 JST",
+  "githubOkAt": "2026-09-26 18:01 JST",
   "fetchError": null,
   "depts": [
     {
@@ -8,24 +8,24 @@
       "name": "経営企画室",
       "role": "経営戦略・優先度決定・新規事業ゲート審査",
       "status": "alert",
-      "now": "全体ミーティング 2026-09-26 集約(経営企画室)",
+      "now": "2026-09-26 経営企画室 判断メモ(第4巡回)",
       "next": "担当issue 4件",
       "lastReport": "2026-09-26",
-      "reportPath": "decisions/meeting-2026-09-26.md",
+      "reportPath": "decisions/2026-09-26-patrol-4.md",
       "openTasks": 4,
-      "activity": 0.5714285714285714
+      "activity": 0.8571428571428571
     },
     {
       "slug": "venture",
       "name": "新規事業開発部",
       "role": "事業アイデア発掘・検証・提案書作成",
       "status": "working",
-      "now": "却下アイデア一覧(新規事業開発部)",
-      "next": "次の定時巡回",
+      "now": "utamix-express 出品計画(ドラフト) — 2026-09-26",
+      "next": "担当issue 1件",
       "lastReport": "2026-09-26",
-      "reportPath": "reports/venture/rejected-ideas.md",
-      "openTasks": 0,
-      "activity": 0.14285714285714285
+      "reportPath": "reports/venture/2026-09-26-utamix-listing-plan.md",
+      "openTasks": 1,
+      "activity": 0.42857142857142855
     },
     {
       "slug": "market",
@@ -37,19 +37,19 @@
       "lastReport": "2026-09-26",
       "reportPath": "reports/market/2026-09-26-customer-validation-design.md",
       "openTasks": 0,
-      "activity": 0.7142857142857143
+      "activity": 1.0
     },
     {
       "slug": "engineering",
       "name": "製品開発部",
       "role": "承認案件のプロトタイプ・MVP開発",
-      "status": "idle",
-      "now": "次の巡回を待機中",
+      "status": "working",
+      "now": "eng ステータスログ(巡回末尾に1行追記・#4 社長決裁による運用)",
       "next": "次の定時巡回",
-      "lastReport": "-",
-      "reportPath": "",
+      "lastReport": "2026-09-26",
+      "reportPath": "reports/eng/status.md",
       "openTasks": 0,
-      "activity": 0.0
+      "activity": 0.14285714285714285
     },
     {
       "slug": "qa",
@@ -73,31 +73,31 @@
       "lastReport": "2026-09-26",
       "reportPath": "reports/finance/usage-2026-09-26.md",
       "openTasks": 0,
-      "activity": 0.14285714285714285
+      "activity": 0.2857142857142857
     },
     {
       "slug": "it",
       "name": "情報システム部",
       "role": "オートメーション健全性・環境整備",
       "status": "alert",
-      "now": "情報システム部 巡回レポート 2026-09-26 (05:40 UTC / 14:40 JST・巡回3)",
-      "next": "担当issue 1件",
+      "now": "情報システム部 巡回レポート 2026-09-26 (09:05 UTC / 18:05 JST・巡回4)",
+      "next": "次の定時巡回",
       "lastReport": "2026-09-26",
-      "reportPath": "reports/it/2026-09-26-patrol-3.md",
-      "openTasks": 1,
-      "activity": 0.5714285714285714
+      "reportPath": "reports/it/2026-09-26-patrol-4.md",
+      "openTasks": 0,
+      "activity": 0.7142857142857143
     },
     {
       "slug": "hr",
       "name": "人事・組織開発部",
       "role": "生産性監視・運用改善提案",
       "status": "working",
-      "now": "2026-09-26 人事・組織開発部 巡回報告(第2回)",
+      "now": "2026-09-26 人事・組織開発部 巡回報告(第3回)",
       "next": "次の定時巡回",
       "lastReport": "2026-09-26",
-      "reportPath": "reports/hr/2026-09-26-patrol-2.md",
+      "reportPath": "reports/hr/2026-09-26-patrol-3.md",
       "openTasks": 0,
-      "activity": 0.2857142857142857
+      "activity": 0.5714285714285714
     },
     {
       "slug": "digest",
@@ -114,16 +114,29 @@
   ],
   "needsHuman": [
     {
-      "num": 19,
-      "title": "[it] office ダッシュボードのデプロイがネットワークポリシーでブロックされる",
-      "dept": "it",
+      "num": 32,
+      "title": "[eng] utamita-board(#13): iOS ビルド/シミュレータ検証の環境が必要",
+      "dept": "eng",
       "state": "waiting",
-      "body": "## 状況\noffice/ ダッシュボード更新オートメーション(auto-8409509ca94f4902880371e8eb5a3dd4)の巡回で、手順4の `deploy`(frontend)が毎回失敗する見込み。\n\n## 原因\n当該オートメーションのセッションにネットワークポリシー(net_policy)が掛かっており、許可先は `git-manager.devin.ai` と `api.github.com` のみ。deploy ツールは S3 アップロード等に**無制限の外部アクセスが必要**なため、ポリシーが存在する限り実行不可(特定ドメイン追加では解消しない)。\n\n## 影響\n-",
+      "body": "## 【製品開発部 / needs-human】utamita-board(#13) iOS ビルド検証環境\n\n**結論**: v1 スキャッフォールドは PR #31 で完成・コアロジックは Linux でテスト済み(8件パス)ですが、SwiftUI シェルのビルド・シミュレータ動作確認には macOS + Xcode が必要です。本 VM は Linux のため検証できません。\n\n## 状況\n\n- 実装: `ventures/in-flight/utamita-board/`(PR #31)— UtamitaCore 純 Swift パッケージ + SwiftUI シェル + XcodeG",
       "options": [
-        "承認する",
-        "却下・中止する",
-        "後で決める",
-        "詳細を聞きたい"
+        "macOS Devin 子セッションの起動を許可する(ビルド+シミュレータ検証をAI側で完遂)",
+        "halcy の Mac で `cd app && xcodegen generate && xcodebuild ...",
+        "UI 検証を後回しにして v1 残り実装(エクスポート等)を先に進める",
+        "見送る(本案件を一時保留)"
+      ]
+    },
+    {
+      "num": 29,
+      "title": "[経営企画室] open PR 10件の main マージ判断をお願いします",
+      "dept": "executive",
+      "state": "waiting",
+      "body": "依頼元: 経営企画室\n\n## 依頼(needs-human: halcy)\nDevin 側のガードで main へのマージは人間の明示承認が必要です。open PR が10件滞留しています。それぞれのマージ判断をお願いします。\n\n| PR | 内容 | 経営企画室の見解 |\n|---|---|---|\n| #26 | utamix-express ヘッドレスMIXパイプライン(#6 G3成果物) | QA実動作検証=マージ可 → 推奨 |\n| #7 | 提案書 utamix-express(正本着地) | QA再レビュー=マージ可 → 推奨 |\n| #12 | 提案書 utamita-boar",
+      "options": [
+        "推奨6件(#26/#7/#12/#10/#15/#25)をまとめてマージ",
+        "全件マージ",
+        "個別に確認する",
+        "詳細な情報がほしい"
       ]
     },
     {
@@ -133,10 +146,10 @@
       "state": "answered",
       "body": "依頼元: 財務・管理部\n\n## 事象(検証済み)\n財務部の常駐セッション(automation auto-c7ca576515b341c78deab752b6ee54b8、実行主体 `automation-service`)で `devin_session_search` を呼ぶと:\n\n`HTTP 403 Forbidden ... Missing required permission 'org.sessions.view' on this organization`\n\nこのため、チャーター上の日次業務(部署別セッション実行回数・概算コスト・失敗数の集計、消費急増・連続失敗の異常検知)が**",
       "options": [
-        "承認する",
-        "却下・中止する",
-        "後で決める",
-        "詳細を聞きたい"
+        "org.sessions.view 権限を付与する",
+        "run_as を creator に変更する",
+        "権限は付与しない(GitHub活動ベースの代替集計で運用)",
+        "詳細な情報がほしい"
       ]
     },
     {
@@ -146,10 +159,9 @@
       "state": "answered",
       "body": "## 状況(検証済み)\n情報システム部の巡回で `devin_session_search` を呼ぶと以下で失敗します:\n\n```\nHTTP 403 Forbidden GET /v3/organizations/org_GX0CIZyddIQvnMPx/sessions\nMissing required permission 'org.sessions.view' on this organization\n```\n\nオートメーション自体は `devin_automation_manage` で確認でき、全10件 enabled・直近invocation succeeded(02:32 UTC",
       "options": [
-        "承認する",
-        "却下・中止する",
-        "後で決める",
-        "詳細を聞きたい"
+        "org.sessions.view 権限を付与する",
+        "権限は付与しない(reports/の1行ステータス代替運用)",
+        "詳細な情報がほしい"
       ]
     }
   ],
@@ -168,21 +180,27 @@
   "reports": [
     {
       "dept": "経営企画室",
-      "title": "全体ミーティング 2026-09-26 集約(経営企画室)",
+      "title": "2026-09-26 経営企画室 判断メモ(第4巡回)",
       "date": "2026-09-26",
-      "url": "https://github.com/halc8312/ai-company/blob/main/decisions/meeting-2026-09-26.md"
+      "url": "https://github.com/halc8312/ai-company/blob/main/decisions/2026-09-26-patrol-4.md"
     },
     {
       "dept": "新規事業開発部",
-      "title": "却下アイデア一覧(新規事業開発部)",
+      "title": "utamix-express 出品計画(ドラフト) — 2026-09-26",
       "date": "2026-09-26",
-      "url": "https://github.com/halc8312/ai-company/blob/main/reports/venture/rejected-ideas.md"
+      "url": "https://github.com/halc8312/ai-company/blob/main/reports/venture/2026-09-26-utamix-listing-plan.md"
     },
     {
       "dept": "市場調査・マーケ部",
       "title": "顧客検証設計 + 2層利益試算ルール — utamix-express / utamita-board",
       "date": "2026-09-26",
       "url": "https://github.com/halc8312/ai-company/blob/main/reports/market/2026-09-26-customer-validation-design.md"
+    },
+    {
+      "dept": "製品開発部",
+      "title": "eng ステータスログ(巡回末尾に1行追記・#4 社長決裁による運用)",
+      "date": "2026-09-26",
+      "url": "https://github.com/halc8312/ai-company/blob/main/reports/eng/status.md"
     },
     {
       "dept": "品質管理・監査部",
@@ -198,25 +216,43 @@
     },
     {
       "dept": "情報システム部",
-      "title": "情報システム部 巡回レポート 2026-09-26 (05:40 UTC / 14:40 JST・巡回3)",
+      "title": "情報システム部 巡回レポート 2026-09-26 (09:05 UTC / 18:05 JST・巡回4)",
       "date": "2026-09-26",
-      "url": "https://github.com/halc8312/ai-company/blob/main/reports/it/2026-09-26-patrol-3.md"
+      "url": "https://github.com/halc8312/ai-company/blob/main/reports/it/2026-09-26-patrol-4.md"
     },
     {
       "dept": "人事・組織開発部",
-      "title": "2026-09-26 人事・組織開発部 巡回報告(第2回)",
+      "title": "2026-09-26 人事・組織開発部 巡回報告(第3回)",
       "date": "2026-09-26",
-      "url": "https://github.com/halc8312/ai-company/blob/main/reports/hr/2026-09-26-patrol-2.md"
+      "url": "https://github.com/halc8312/ai-company/blob/main/reports/hr/2026-09-26-patrol-3.md"
     }
   ],
   "_allIssues": [
     {
       "labels": [
         {
-          "id": "LA_kwDOUrsJas8AAAAC4XoC7g",
-          "name": "dept:it",
+          "id": "LA_kwDOUrsJas8AAAAC4XoBsA",
+          "name": "dept:eng",
           "description": "",
-          "color": "64748b"
+          "color": "22c55e"
+        },
+        {
+          "id": "LA_kwDOUrsJas8AAAAC4XoHkg",
+          "name": "needs-human",
+          "description": "",
+          "color": "dc2626"
+        }
+      ],
+      "number": 32,
+      "title": "[eng] utamita-board(#13): iOS ビルド/シミュレータ検証の環境が必要"
+    },
+    {
+      "labels": [
+        {
+          "id": "LA_kwDOUrsJas8AAAAC4XoBCQ",
+          "name": "dept:venture",
+          "description": "",
+          "color": "3b82f6"
         },
         {
           "id": "LA_kwDOUrsJas8AAAAC4XoDdA",
@@ -225,8 +261,32 @@
           "color": "1d4ed8"
         }
       ],
-      "number": 27,
-      "title": "[TEST] オフィス回答経路の疎通確認"
+      "number": 30,
+      "title": "[venture] halcy回答共有: 収益化済みiOSアプリ実績なし → 新規ニッチアプリ一択で"
+    },
+    {
+      "labels": [
+        {
+          "id": "LA_kwDOUrsJas8AAAAC4XoAoA",
+          "name": "dept:executive",
+          "description": "",
+          "color": "8b5cf6"
+        },
+        {
+          "id": "LA_kwDOUrsJas8AAAAC4XoDdA",
+          "name": "type:task",
+          "description": "",
+          "color": "1d4ed8"
+        },
+        {
+          "id": "LA_kwDOUrsJas8AAAAC4XoHkg",
+          "name": "needs-human",
+          "description": "",
+          "color": "dc2626"
+        }
+      ],
+      "number": 29,
+      "title": "[経営企画室] open PR 10件の main マージ判断をお願いします"
     },
     {
       "labels": [
@@ -241,10 +301,22 @@
           "name": "type:alert",
           "description": "",
           "color": "dc2626"
+        }
+      ],
+      "number": 28,
+      "title": "[監査] オフィス回答中継(webhook.site)が無認証 — halcy回答のなりすまし投稿が可能"
+    },
+    {
+      "labels": [
+        {
+          "id": "LA_kwDOUrsJas8AAAAC4XoC7g",
+          "name": "dept:it",
+          "description": "",
+          "color": "64748b"
         },
         {
-          "id": "LA_kwDOUrsJas8AAAAC4XoHkg",
-          "name": "needs-human",
+          "id": "LA_kwDOUrsJas8AAAAC4XoEvw",
+          "name": "type:alert",
           "description": "",
           "color": "dc2626"
         }
@@ -279,24 +351,6 @@
           "color": "8b5cf6"
         },
         {
-          "id": "LA_kwDOUrsJas8AAAAC4XoDdA",
-          "name": "type:task",
-          "description": "",
-          "color": "1d4ed8"
-        }
-      ],
-      "number": 14,
-      "title": "[情報依頼] 既存iOSアプリの一覧と直近DL/収益の共有をお願いします"
-    },
-    {
-      "labels": [
-        {
-          "id": "LA_kwDOUrsJas8AAAAC4XoAoA",
-          "name": "dept:executive",
-          "description": "",
-          "color": "8b5cf6"
-        },
-        {
           "id": "LA_kwDOUrsJas8AAAAC4XoDzA",
           "name": "type:proposal",
           "description": "",
@@ -307,6 +361,12 @@
           "name": "status:approved",
           "description": "",
           "color": "16a34a"
+        },
+        {
+          "id": "LA_kwDOUrsJas8AAAAC4XoGBQ",
+          "name": "status:in-flight",
+          "description": "",
+          "color": "2563eb"
         },
         {
           "id": "LA_kwDOUrsJas8AAAAC4XoHHg",
