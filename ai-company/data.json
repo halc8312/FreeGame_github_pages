@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-09-26 18:01 JST",
-  "githubOkAt": "2026-09-26 18:01 JST",
+  "generatedAt": "2026-09-26 18:23 JST",
+  "githubOkAt": "2026-09-26 18:23 JST",
   "fetchError": null,
   "depts": [
     {
@@ -8,12 +8,12 @@
       "name": "経営企画室",
       "role": "経営戦略・優先度決定・新規事業ゲート審査",
       "status": "alert",
-      "now": "2026-09-26 経営企画室 判断メモ(第4巡回)",
-      "next": "担当issue 4件",
+      "now": "2026-09-26 経営企画室 判断メモ(第5巡回・定時)",
+      "next": "担当issue 3件",
       "lastReport": "2026-09-26",
-      "reportPath": "decisions/2026-09-26-patrol-4.md",
-      "openTasks": 4,
-      "activity": 0.8571428571428571
+      "reportPath": "decisions/2026-09-26-patrol-5.md",
+      "openTasks": 3,
+      "activity": 1.0
     },
     {
       "slug": "venture",
@@ -21,10 +21,10 @@
       "role": "事業アイデア発掘・検証・提案書作成",
       "status": "working",
       "now": "utamix-express 出品計画(ドラフト) — 2026-09-26",
-      "next": "担当issue 1件",
+      "next": "次の定時巡回",
       "lastReport": "2026-09-26",
       "reportPath": "reports/venture/2026-09-26-utamix-listing-plan.md",
-      "openTasks": 1,
+      "openTasks": 0,
       "activity": 0.42857142857142855
     },
     {
@@ -114,6 +114,19 @@
   ],
   "needsHuman": [
     {
+      "num": 33,
+      "title": "[判定依頼] utamix-express ブラインド試聴(A/B 3曲)の合否をお願いします — 全社フォーカスの品質ゲート",
+      "dept": "executive",
+      "state": "waiting",
+      "body": "依頼元: 経営企画室(案件: #6 utamix-express / G3成果物 PR #26)\n\n## 依頼(needs-human: halcy)\n全社フォーカス案件 utamix-express の品質ゲートです。issue #6 のコメントに A/B 盲検用 WAV 3曲(バラード/ポップ/アップテンポ)を添付済み → https://github.com/halc8312/ai-company/issues/6\n\n- 客観QC: 統合ラウドネス -14.0±0.1 LUFS・ピーク -1.0dBFS・クリップ0(QA実動作検証=マージ可、テスト11件パス)\n- 注意(QA指摘): 素",
+      "options": [
+        "合格(出品準備へ進む)",
+        "不合格(kill/見直し審査)",
+        "実人声素材での再検証を先に実施",
+        "詳細な情報がほしい"
+      ]
+    },
+    {
       "num": 32,
       "title": "[eng] utamita-board(#13): iOS ビルド/シミュレータ検証の環境が必要",
       "dept": "eng",
@@ -127,15 +140,15 @@
       ]
     },
     {
-      "num": 29,
-      "title": "[経営企画室] open PR 10件の main マージ判断をお願いします",
-      "dept": "executive",
-      "state": "waiting",
-      "body": "依頼元: 経営企画室\n\n## 依頼(needs-human: halcy)\nDevin 側のガードで main へのマージは人間の明示承認が必要です。open PR が10件滞留しています。それぞれのマージ判断をお願いします。\n\n| PR | 内容 | 経営企画室の見解 |\n|---|---|---|\n| #26 | utamix-express ヘッドレスMIXパイプライン(#6 G3成果物) | QA実動作検証=マージ可 → 推奨 |\n| #7 | 提案書 utamix-express(正本着地) | QA再レビュー=マージ可 → 推奨 |\n| #12 | 提案書 utamita-boar",
+      "num": 28,
+      "title": "[監査] オフィス回答中継(webhook.site)が無認証 — halcy回答のなりすまし投稿が可能",
+      "dept": "it",
+      "state": "answered",
+      "body": "[品質管理・監査部 / 監査発見 — 決裁パイプラインの完全性]\n\n## 事実(検証済み)\n- commit 6967891 で `office/index.html` の回答ボタンが `POST https://webhook.site/432ecc01-...` に `{issue, answer}` を送信し、`office/update.py` の `ingest_answers()` がそれを「**[オフィス経由でhalcyが回答]**」として issue コメント化 + needs-human ラベル自動除去する\n- この中継は**認証なし**: 正しい形式の JSON を POS",
       "options": [
-        "推奨6件(#26/#7/#12/#10/#15/#25)をまとめてマージ",
-        "全件マージ",
-        "個別に確認する",
+        "案3を採用(ボタンをGitHubコメントURL生成に置き換え、中継廃止)",
+        "案1を採用(回答は未検証扱い・部署が二重確認してから処理)",
+        "案2を採用(共有秘密を回答JSONに含め照合)",
         "詳細な情報がほしい"
       ]
     },
@@ -180,9 +193,9 @@
   "reports": [
     {
       "dept": "経営企画室",
-      "title": "2026-09-26 経営企画室 判断メモ(第4巡回)",
+      "title": "2026-09-26 経営企画室 判断メモ(第5巡回・定時)",
       "date": "2026-09-26",
-      "url": "https://github.com/halc8312/ai-company/blob/main/decisions/2026-09-26-patrol-4.md"
+      "url": "https://github.com/halc8312/ai-company/blob/main/decisions/2026-09-26-patrol-5.md"
     },
     {
       "dept": "新規事業開発部",
@@ -231,42 +244,6 @@
     {
       "labels": [
         {
-          "id": "LA_kwDOUrsJas8AAAAC4XoBsA",
-          "name": "dept:eng",
-          "description": "",
-          "color": "22c55e"
-        },
-        {
-          "id": "LA_kwDOUrsJas8AAAAC4XoHkg",
-          "name": "needs-human",
-          "description": "",
-          "color": "dc2626"
-        }
-      ],
-      "number": 32,
-      "title": "[eng] utamita-board(#13): iOS ビルド/シミュレータ検証の環境が必要"
-    },
-    {
-      "labels": [
-        {
-          "id": "LA_kwDOUrsJas8AAAAC4XoBCQ",
-          "name": "dept:venture",
-          "description": "",
-          "color": "3b82f6"
-        },
-        {
-          "id": "LA_kwDOUrsJas8AAAAC4XoDdA",
-          "name": "type:task",
-          "description": "",
-          "color": "1d4ed8"
-        }
-      ],
-      "number": 30,
-      "title": "[venture] halcy回答共有: 収益化済みiOSアプリ実績なし → 新規ニッチアプリ一択で"
-    },
-    {
-      "labels": [
-        {
           "id": "LA_kwDOUrsJas8AAAAC4XoAoA",
           "name": "dept:executive",
           "description": "",
@@ -285,8 +262,26 @@
           "color": "dc2626"
         }
       ],
-      "number": 29,
-      "title": "[経営企画室] open PR 10件の main マージ判断をお願いします"
+      "number": 33,
+      "title": "[判定依頼] utamix-express ブラインド試聴(A/B 3曲)の合否をお願いします — 全社フォーカスの品質ゲート"
+    },
+    {
+      "labels": [
+        {
+          "id": "LA_kwDOUrsJas8AAAAC4XoBsA",
+          "name": "dept:eng",
+          "description": "",
+          "color": "22c55e"
+        },
+        {
+          "id": "LA_kwDOUrsJas8AAAAC4XoHkg",
+          "name": "needs-human",
+          "description": "",
+          "color": "dc2626"
+        }
+      ],
+      "number": 32,
+      "title": "[eng] utamita-board(#13): iOS ビルド/シミュレータ検証の環境が必要"
     },
     {
       "labels": [
@@ -299,6 +294,12 @@
         {
           "id": "LA_kwDOUrsJas8AAAAC4XoEvw",
           "name": "type:alert",
+          "description": "",
+          "color": "dc2626"
+        },
+        {
+          "id": "LA_kwDOUrsJas8AAAAC4XoHkg",
+          "name": "needs-human",
           "description": "",
           "color": "dc2626"
         }
@@ -377,24 +378,6 @@
       ],
       "number": 13,
       "title": "[提案] 歌ってみた制作管理ボード iOSアプリ utamita-board"
-    },
-    {
-      "labels": [
-        {
-          "id": "LA_kwDOUrsJas8AAAAC4XoAoA",
-          "name": "dept:executive",
-          "description": "",
-          "color": "8b5cf6"
-        },
-        {
-          "id": "LA_kwDOUrsJas8AAAAC4XoDdA",
-          "name": "type:task",
-          "description": "",
-          "color": "1d4ed8"
-        }
-      ],
-      "number": 11,
-      "title": "【人事提案】提案書の着地ルール未定義により審査対象が main に存在しない状態になった"
     },
     {
       "labels": [
