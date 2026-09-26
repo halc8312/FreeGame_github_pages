@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-09-26 17:00 JST",
-  "githubOkAt": "2026-09-26 17:00 JST",
+  "generatedAt": "2026-09-26 17:01 JST",
+  "githubOkAt": "2026-09-26 17:01 JST",
   "fetchError": null,
   "depts": [
     {
@@ -8,12 +8,12 @@
       "name": "経営企画室",
       "role": "経営戦略・優先度決定・新規事業ゲート審査",
       "status": "alert",
-      "now": "2026-09-26 経営企画室 判断メモ(第2巡回・全体ミーティング初回開催指示)",
+      "now": "全体ミーティング 2026-09-26 集約(経営企画室)",
       "next": "担当issue 4件",
       "lastReport": "2026-09-26",
-      "reportPath": "decisions/2026-09-26-patrol-2.md",
+      "reportPath": "decisions/meeting-2026-09-26.md",
       "openTasks": 4,
-      "activity": 0.2857142857142857
+      "activity": 0.5714285714285714
     },
     {
       "slug": "venture",
@@ -32,12 +32,12 @@
       "name": "市場調査・マーケ部",
       "role": "トレンド・競合・需要の調査",
       "status": "working",
-      "now": "トレンド巡回 2026-09-26 (市場調査・マーケティング部)",
+      "now": "顧客検証設計 + 2層利益試算ルール — utamix-express / utamita-board",
       "next": "次の定時巡回",
       "lastReport": "2026-09-26",
-      "reportPath": "reports/market/2026-09-26-trends.md",
+      "reportPath": "reports/market/2026-09-26-customer-validation-design.md",
       "openTasks": 0,
-      "activity": 0.42857142857142855
+      "activity": 0.7142857142857143
     },
     {
       "slug": "engineering",
@@ -56,12 +56,12 @@
       "name": "品質管理・監査部",
       "role": "PR/成果物レビュー・部門活動監査",
       "status": "working",
-      "now": "QA ステータスログ(巡回末尾に1行追記・#4 社長決裁による運用)",
+      "now": "utamix-express ブラインド試聴ゲート — 判定基準(案)",
       "next": "次の定時巡回",
       "lastReport": "2026-09-26",
-      "reportPath": "reports/qa/status.md",
+      "reportPath": "reports/qa/2026-09-26-blind-test-gate.md",
       "openTasks": 0,
-      "activity": 0.2857142857142857
+      "activity": 0.42857142857142855
     },
     {
       "slug": "finance",
@@ -153,9 +153,9 @@
   "reports": [
     {
       "dept": "経営企画室",
-      "title": "2026-09-26 経営企画室 判断メモ(第2巡回・全体ミーティング初回開催指示)",
+      "title": "全体ミーティング 2026-09-26 集約(経営企画室)",
       "date": "2026-09-26",
-      "url": "https://github.com/halc8312/ai-company/blob/main/decisions/2026-09-26-patrol-2.md"
+      "url": "https://github.com/halc8312/ai-company/blob/main/decisions/meeting-2026-09-26.md"
     },
     {
       "dept": "新規事業開発部",
@@ -165,15 +165,15 @@
     },
     {
       "dept": "市場調査・マーケ部",
-      "title": "トレンド巡回 2026-09-26 (市場調査・マーケティング部)",
+      "title": "顧客検証設計 + 2層利益試算ルール — utamix-express / utamita-board",
       "date": "2026-09-26",
-      "url": "https://github.com/halc8312/ai-company/blob/main/reports/market/2026-09-26-trends.md"
+      "url": "https://github.com/halc8312/ai-company/blob/main/reports/market/2026-09-26-customer-validation-design.md"
     },
     {
       "dept": "品質管理・監査部",
-      "title": "QA ステータスログ(巡回末尾に1行追記・#4 社長決裁による運用)",
+      "title": "utamix-express ブラインド試聴ゲート — 判定基準(案)",
       "date": "2026-09-26",
-      "url": "https://github.com/halc8312/ai-company/blob/main/reports/qa/status.md"
+      "url": "https://github.com/halc8312/ai-company/blob/main/reports/qa/2026-09-26-blind-test-gate.md"
     },
     {
       "dept": "財務・管理部",
