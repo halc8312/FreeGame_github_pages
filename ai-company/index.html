@@ -24,15 +24,18 @@
   .notice { max-width:1168px; margin:8px auto 14px; padding:12px 16px; border:1px solid var(--accent); border-radius:10px; background:#2d261e; font-size:12px; line-height:1.8; overflow-wrap:anywhere; }
   .notice.error { border-color:var(--alert); background:#302029; }
   .notice strong { display:block; font-size:13px; }
+  .refresh-bar { max-width:1168px; margin:8px auto 16px; padding:0 16px; display:flex; align-items:center; flex-wrap:wrap; gap:8px 16px; }
+  .transport { color:var(--dim); font-size:11px; line-height:1.7; flex:1 1 240px; }
+  .transport.error { color:var(--alert); }
   .retry { margin-top:8px; padding:8px 12px; border:1px solid var(--line); border-radius:7px; background:var(--panel2); cursor:pointer; }
   .retry:disabled { opacity:.6; cursor:wait; }
 
   /* The map and its markers share one coordinate system, independent of the board. */
   .mapwrap { position:relative; width:100%; max-width:1200px; margin:0 auto; }
   .map-scroll { overflow-x:auto; border-radius:14px; }
-  .floor { position:relative; }
-  .floor > img.map { width:100%; display:block; border-radius:14px; }
-  .dept { position:absolute; transform:translate(-50%,-50%); cursor:pointer; text-align:center; width:96px; min-height:72px; border:0; background:none; border-radius:10px; }
+  .floor { position:relative; min-width:800px; }
+  .floor > img.map { width:100%; height:auto; display:block; border-radius:14px; }
+  .dept { position:absolute; transform:translate(-50%,-50%); cursor:pointer; text-align:center; width:112px; min-height:64px; border:0; background:none; border-radius:10px; }
   .bubble { font-size:10px; font-weight:700; padding:2px 8px; border-radius:99px; white-space:nowrap; background:var(--panel2); border:1px solid var(--line); color:var(--dim); }
   .dept .bubble { position:absolute; top:-14px; left:50%; transform:translateX(-50%); }
   .bubble.reported { background:#193a32; color:var(--ok); border-color:var(--ok); }
@@ -41,13 +44,14 @@
   .bubble.unknown { background:#382b4b; color:var(--unknown); border-color:var(--unknown); }
   .av { width:52px; height:52px; border-radius:50%; background-image:url(assets/avatars.png); background-size:300% 300%; background-color:var(--panel2); border:3px solid var(--line); }
   .dept .av { display:block; margin:0 auto; box-shadow:0 4px 14px rgba(0,0,0,.45); transition:transform .15s; }
-  .dept .name { display:block; font-size:10px; font-weight:700; margin-top:3px; color:#fff; text-shadow:0 1px 4px #000,0 0 6px #000; }
+  .dept .name { display:block; width:max-content; max-width:112px; font-size:10px; font-weight:700; line-height:1.5; margin:3px auto 0; padding:2px 5px; border-radius:4px; background:rgba(16,18,28,.9); color:#fff; }
+  .dept.historical .av { border-style:dashed; }
   .dept.reported .av { border-color:var(--ok); }
   .dept.no_report .av { border-color:var(--idle); }
   .dept.alert .av { border-color:var(--alert); }
   .dept.unknown .av { border-color:var(--unknown); }
   .zone { position:absolute; font-size:10px; font-weight:700; color:#fff; padding:3px 10px; border-radius:6px; background:rgba(16,18,28,.55); border:1px solid rgba(255,255,255,.15); transform:translateX(-50%); text-shadow:0 1px 3px #000; pointer-events:none; }
-  .map-hint { display:none; color:var(--dim); font-size:11px; padding:8px 16px 0; }
+  .map-hint { color:var(--dim); font-size:11px; line-height:1.7; padding:8px 16px; }
 
   .board { position:absolute; top:12px; right:12px; width:204px; background:rgba(16,18,28,.9); border:1px solid var(--line); border-radius:12px; padding:12px; backdrop-filter:blur(6px); }
   .board h3 { font-size:11px; color:var(--accent); letter-spacing:1px; margin-bottom:8px; }
@@ -108,12 +112,8 @@
     .top { align-items:flex-start; flex-direction:column; gap:6px; padding:14px 16px 10px; }
     .updated { text-align:left; }
     .notice { margin:8px 16px 14px; }
-    .floor { min-width:0; }
-    .floor .zone { display:none; }
-    #markers { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px 4px; padding:24px 8px 8px; }
-    .dept { position:static; transform:none; width:100%; min-width:0; }
-    .dept .bubble { position:static; transform:none; display:inline-block; font-size:9px; padding:2px 4px; margin-bottom:4px; }
-    .dept .name { overflow-wrap:anywhere; }
+    .dept .av { width:46px; height:46px; }
+    .dept .bubble { font-size:9px; padding:2px 5px; }
     .board { position:static; width:calc(100% - 32px); margin:10px auto 0; }
     .board .counts { grid-template-columns:repeat(4,minmax(0,1fr)); }
     .board .donut-wrap { justify-content:center; }
@@ -133,21 +133,23 @@
   <div class="updated" aria-live="polite"><div id="updated">データを読み込んでいます</div><div id="sourceTime"></div></div>
 </header>
 <div class="notice" id="notice" role="alert" hidden></div>
-<div class="notice" id="transport" role="status" hidden></div>
-<div class="wrap"><button class="retry" id="refresh" type="button">最新データを再取得</button></div>
+<div class="refresh-bar">
+  <button class="retry" id="refresh" type="button">配信データを再確認</button>
+  <div class="transport" id="transport" role="status" hidden></div>
+</div>
 <noscript><div class="notice error">最新の状態を表示するにはJavaScriptを有効にしてください。</div></noscript>
 
 <main>
 <div class="mapwrap">
+  <p class="map-hint" id="mapHint">席のアイコンを選ぶと部署の詳細が開きます。狭い画面ではマップを左右にスワイプできます。キーボードでも部署を選べます。</p>
   <div class="map-scroll" tabindex="0" aria-label="オフィスマップ。各部署を選ぶと詳細が開きます。" aria-describedby="mapHint">
     <div class="floor">
-      <img class="map" src="assets/office-map.png" alt="AI Companyのオフィス見取り図">
+      <img class="map" src="assets/office-map.png" width="1536" height="1024" alt="AI Companyのオフィス見取り図">
       <div class="zone" style="left:90%;top:12%" aria-hidden="true">◉ 会議室</div>
       <div class="zone" style="left:88%;top:66%" aria-hidden="true">☕ ラウンジ(雑談)</div>
       <div id="markers"></div>
     </div>
   </div>
-  <p class="map-hint" id="mapHint">マップは左右にスクロールできます。部署を選ぶと詳細が開きます。</p>
   <aside class="board" id="board" aria-label="部署の報告状況"><p class="empty">データを読み込んでいます</p></aside>
 </div>
 
@@ -235,7 +237,11 @@ function avatar(item) {
 }
 function badge(item) {
   const status = statusOf(item);
-  return node('span', 'bubble ' + status, STATUS[status].label);
+  return node('span', 'bubble ' + status, statusLabel(status, item.historical));
+}
+function statusLabel(status, historical = false) {
+  if (!historical) return STATUS[status].label;
+  return {reported:'記録：活動あり', no_report:'記録：活動なし', alert:'記録：要対応', unknown:'取得不明'}[status];
 }
 function detailRow(label, value) {
   const row = node('div', 'row');
@@ -262,9 +268,10 @@ function openDept(item, trigger, sourceError) {
     detailRow('未完了の担当issue' + (sourceError ? '（前回取得値を含む）' : ''), taskLabel(item.openTasks)),
     detailRow('次の予定', item.next || '未確認'),
     detailRow('最終報告', dateLabel(item.lastReport)));
+  if (item.historical) body.append(detailRow('表示の時点', dateLabel(item.recordedAt) + 'の取得記録。現在の状態は未確認です。'));
   if (item.lastActiveAt) body.append(detailRow('最終活動', dateLabel(item.lastActiveAt)));
   if (Number.isInteger(item.commitsToday) && item.commitsToday > 0)
-    body.append(detailRow('本日のコミット', item.commitsToday + '件'));
+    body.append(detailRow(item.historical ? '取得日のコミット' : '本日のコミット', item.commitsToday + '件'));
   if (Number.isInteger(item.pendingHuman) && item.pendingHuman > 0)
     body.append(detailRow('halcy確認待ち', item.pendingHuman + '件（下の「人間の対応事項」に一覧あり）'));
   if (safeUrl(item.reportUrl)) {
@@ -282,11 +289,11 @@ function renderMarkers(depts, sourceError) {
   const markers = document.getElementById('markers');
   markers.replaceChildren();
   depts.filter(d => validMap(d.map)).forEach(dept => {
-    const marker = node('button', 'dept ' + statusOf(dept));
+    const marker = node('button', 'dept ' + statusOf(dept) + (dept.historical ? ' historical' : ''));
     marker.type = 'button';
     marker.style.left = dept.map.pos[0] + '%';
     marker.style.top = dept.map.pos[1] + '%';
-    marker.setAttribute('aria-label', dept.name + '：' + STATUS[statusOf(dept)].label);
+    marker.setAttribute('aria-label', dept.name + '：' + statusLabel(statusOf(dept), dept.historical));
     marker.setAttribute('aria-haspopup', 'dialog');
     marker.setAttribute('aria-controls', 'popup');
     marker.append(badge(dept), avatar(dept), node('span', 'name', dept.name));
@@ -294,36 +301,20 @@ function renderMarkers(depts, sourceError) {
     markers.append(marker);
   });
 }
-function renderBoard(depts) {
+function renderBoard(depts, historical = false, recordedAt = null) {
   const board = document.getElementById('board');
   const counts = Object.fromEntries(Object.keys(STATUS).map(key => [key, 0]));
   depts.forEach(dept => { counts[statusOf(dept)]++; });
-  board.replaceChildren(node('h3', '', '部署の報告状況 · ' + depts.length + '部署'));
+  board.replaceChildren(node('h3', '', (historical ? '前回取得時の部署状況' : '部署の活動記録') + ' · ' + depts.length + '部署'));
   const cards = node('div', 'counts');
-  const legend = node('div', 'legend');
-  const segments = [];
-  let start = 0;
   Object.entries(STATUS).forEach(([key, config]) => {
     const card = node('div', 'count');
     const number = node('div', 'n', counts[key]);
     number.style.color = config.color;
-    card.append(number, node('div', 'l', config.label));
+    card.append(number, node('div', 'l', statusLabel(key, historical)));
     cards.append(card);
-    const line = node('div');
-    const dot = node('span', 'dot');
-    dot.style.background = config.color;
-    line.append(dot, document.createTextNode(config.label + ' ' + counts[key]));
-    legend.append(line);
-    const end = start + (depts.length ? counts[key] / depts.length * 360 : 0);
-    segments.push(`${config.color} ${start}deg ${end}deg`);
-    start = end;
   });
-  const chart = node('div', 'donut-wrap');
-  const donut = node('div', 'donut');
-  donut.setAttribute('aria-hidden', 'true');
-  if (depts.length) donut.style.background = 'conic-gradient(' + segments.join(',') + ')';
-  chart.append(donut, legend);
-  board.append(cards, chart, node('p', 'note', '当日＝JST。報告・コミット・issueに基づく分類で、実行中を表すものではありません。'));
+  board.append(cards, node('p', 'note', (historical ? dateLabel(recordedAt) + '時点の記録です。現在の状態は未確認。' : '当日＝JST。') + '報告・コミット・Issueに基づく分類で、実行中を表すものではありません。'));
 }
 function renderCollaborators(items, sourceError) {
   const area = document.getElementById('collaborators');
@@ -433,14 +424,14 @@ function renderNotice(data) {
   if (Array.isArray(data.warnings)) data.warnings.filter(item => typeof item === 'string').forEach(item => notice.append(node('p', '', item)));
   notice.hidden = !notice.childNodes.length;
 }
-function render(data) {
-  const sourceError = data.sources.github.status === 'error';
+function render(data, historical = false) {
+  const sourceError = historical || data.sources.github.status === 'error';
   document.getElementById('subtitle').textContent = '収益機会を組織的に発掘・検証するAI会社 · ' + data.depts.length + '部署';
   document.getElementById('updated').textContent = 'データ生成: ' + dateLabel(data.generatedAt);
   document.getElementById('sourceTime').textContent = '取得元: ' + sourceLabel(data.sources.github) + ' ／ 最終成功: ' + dateLabel(data.sources.github.lastSuccessAt);
   renderNotice(data);
   renderMarkers(data.depts, sourceError);
-  renderBoard(data.depts);
+  renderBoard(data.depts, historical, data.sources.github.lastSuccessAt);
   renderCollaborators(data.collaborators, sourceError);
   renderAnswers(data.needsHuman, sourceError);
   renderIssues('proposals', data.proposals, '提案', 'prop', sourceError);
@@ -469,24 +460,34 @@ const STALE_MS = 15 * 60 * 1000;
 let lastData = null;
 let lastLoadedAt = null;
 let loading = false;
-function staleData(data, now = Date.now()) {
-  return [data.generatedAt, data.sources.github.lastSuccessAt].some(value => {
-    const timestamp = typeof value === 'string' ? Date.parse(value) : NaN;
-    return !Number.isFinite(timestamp) || now - timestamp > STALE_MS || timestamp > now + 60000;
-  });
+function dataAge(data, now = Date.now()) {
+  const times = [data.generatedAt, data.sources.github.lastSuccessAt].map(value =>
+    typeof value === 'string' && /T.*(?:Z|[+-]\d{2}:\d{2})$/.test(value) ? Date.parse(value) : NaN);
+  if (times.some(t => !Number.isFinite(t) || t > now + 60000) || times[1] > times[0] + 60000) return 'invalid';
+  return times.some(t => now - t > STALE_MS) ? 'old' : 'fresh';
+}
+function staleData(data, now = Date.now()) { return dataAge(data, now) !== 'fresh'; }
+function dataRank(data) {
+  return dataAge(data) === 'invalid' ? -Infinity : Date.parse(data.generatedAt);
 }
 function displayData(data, transportError = false) {
-  const stale = staleData(data);
-  const uncertain = stale || transportError || data.sources.github.status === 'error';
-  const view = {...data,
-    depts:data.depts.map(item => uncertain ? {...item, status:'unknown'} : item),
-    collaborators:data.collaborators.map(item => uncertain ? {...item, status:'unknown'} : item),
-    sources:{github:{...data.sources.github, status:uncertain ? 'error' : 'ok'}}};
-  render(view);
-  if (stale) {
-    const notice = document.getElementById('notice');
+  const age = dataAge(data);
+  const sourceError = data.sources.github.status === 'error';
+  const historical = age !== 'fresh' || transportError || sourceError;
+  const asRecord = item => ({...item, historical, recordedAt:data.sources.github.lastSuccessAt,
+    status:age === 'invalid' || sourceError ? 'unknown' : statusOf(item)});
+  // Keep the generator's GitHub result intact: elapsed time is not an API failure.
+  const view = {...data, depts:data.depts.map(asRecord), collaborators:data.collaborators.map(asRecord)};
+  render(view, historical);
+  const notice = document.getElementById('notice');
+  if (age === 'old') {
     notice.hidden = false;
-    notice.append(node('strong', '', 'データが15分以上古いか、時刻を確認できません。現在の状態は未確認です。'));
+    notice.append(node('strong', '', '新しい集計データを待っています。'),
+      node('p', '', dateLabel(data.sources.github.lastSuccessAt) + 'の取得記録を表示しています（15分以上経過）。現在の状況は各Issueで確認してください。'));
+  } else if (age === 'invalid') {
+    notice.hidden = false;
+    notice.append(node('strong', '', '集計・取得時刻を確認できません。'),
+      node('p', '', '現在の状態は未確認です。時刻が不正なデータを最新として扱っていません。'));
   }
 }
 async function loadData() {
@@ -496,8 +497,14 @@ async function loadData() {
   refresh.disabled = true;
   const transport = document.getElementById('transport');
   const failures = [];
+  let candidate = null, selectedLabel = '', checked = 0;
+  const seen = new Set();
   try {
     for (const [url, label] of DATA_URLS) {
+      // On the published site both entries may resolve to the same URL.
+      const key = typeof location === 'undefined' ? url : new URL(url, location.href).href;
+      if (seen.has(key)) continue;
+      seen.add(key);
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 10000);
       try {
@@ -505,24 +512,30 @@ async function loadData() {
         if (!response.ok) throw new Error('HTTP ' + response.status);
         const data = await response.json();
         validateData(data);
-        // 古い同梱ファイルで、直前のより新しい表示を巻き戻さない。
-        if (lastData && Date.parse(data.generatedAt) < Date.parse(lastData.generatedAt)) {
-          throw new Error('直前の表示より古いデータ');
-        }
-        lastData = data;
-        lastLoadedAt = new Date().toISOString();
-        displayData(data);
-        transport.hidden = false;
-        transport.textContent = '読込元: ' + label + ' ／ 読込成功: ' + dateLabel(lastLoadedAt)
-          + ' ／ 60秒ごとに再取得。' + (failures.length ? ' 外部配信の取得・形式確認に失敗したため同梱JSONを表示しています。' : '');
-        return;
+        if (lastData && dataRank(data) < dataRank(lastData)) throw new Error('直前の表示より古いデータ');
+        if (!candidate || dataRank(data) > dataRank(candidate)) { candidate = data; selectedLabel = label; }
+        checked++;
+        // A stale primary does not prevent trying a newer bundled snapshot.
+        if (!staleData(data) && data.sources.github.status === 'ok') break;
       } catch (_) { failures.push(label); }
       finally { clearTimeout(timeout); }
     }
     transport.hidden = false;
-    transport.textContent = '外部配信JSON・同梱JSONを取得できません。' + (lastData ? ' 最後に読めたデータを保持しています。最終読込: ' + dateLabel(lastLoadedAt) : '');
-    if (lastData) displayData(lastData, true);
-    else showLoadError('通信、JSON形式、schema 2の同時配信を確認してください。');
+    transport.className = 'transport' + (!candidate ? ' error' : '');
+    if (candidate) {
+      lastData = candidate;
+      lastLoadedAt = new Date().toISOString();
+      displayData(candidate);
+      transport.textContent = '配信データ確認: ' + dateLabel(lastLoadedAt) + ' · ' + selectedLabel
+        + '。60秒ごとに確認。' + (selectedLabel === '同梱JSON'
+          ? failures.length ? ' 外部配信の取得・形式確認に失敗したため同梱JSONを表示。' : ' 外部配信より新しい記録を表示。'
+          : checked > 1 ? ' 配信元を比較し、新しい記録を表示。' : '')
+        + (staleData(candidate) ? ' 再確認だけでは集計時刻は更新されません。' : '');
+    } else {
+      transport.textContent = '配信データを再確認できません。' + (lastData ? ' 最後に読めた記録を保持しています。最終読込: ' + dateLabel(lastLoadedAt) : '');
+      if (lastData) displayData(lastData, true);
+      else showLoadError('通信または配信データを確認してください。各IssueはGitHubから確認できます。');
+    }
   } finally { loading = false; refresh.disabled = false; }
 }
 document.getElementById('refresh').addEventListener('click', loadData);
