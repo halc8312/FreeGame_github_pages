@@ -804,7 +804,7 @@ const DATA_URLS = [
   ['https://halc8312.github.io/FreeGame_github_pages/ai-company/data.json', '外部配信JSON'],
   ['./data.json', '同梱JSON']
 ];
-const STALE_MS = 15 * 60 * 1000;
+const STALE_MS = 150 * 60 * 1000; // 集計周期2h + 30分余裕(issue #44 で情シス選定)
 let lastData = null;
 let lastLoadedAt = null;
 let loading = false;
@@ -831,7 +831,7 @@ function displayData(data, transportError = false) {
   if (age === 'old') {
     notice.hidden = false;
     notice.append(node('strong', '', '新しい集計データを待っています。'),
-      node('p', '', dateLabel(data.sources.github.lastSuccessAt) + 'の取得記録を表示しています（15分以上経過）。現在の状況は各Issueで確認してください。'));
+      node('p', '', dateLabel(data.sources.github.lastSuccessAt) + 'の取得記録を表示しています（' + Math.round(STALE_MS/60000) + '分以上経過）。現在の状況は各Issueで確認してください。'));
   } else if (age === 'invalid') {
     notice.hidden = false;
     notice.append(node('strong', '', '集計・取得時刻を確認できません。'),
