@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="office-chat" content="disabled">
+<meta name="office-version" content="2026-09-27-record-evidence">
 <title>AI Company Office</title>
 <style>
   :root {
@@ -58,6 +59,8 @@
   .bubble.no_report { background:var(--panel2); color:var(--dim); border-color:var(--idle); }
   .bubble.alert { background:#462730; color:var(--alert); border-color:var(--alert); }
   .bubble.unknown { background:#382b4b; color:var(--unknown); border-color:var(--unknown); }
+  .bubble.recorded { background:#19313e; color:var(--accent2); border-color:var(--accent2); }
+  .dept.recorded .av { border-color:var(--accent2); }
   .av { width:52px; height:52px; border-radius:50%; background-image:url(assets/avatars.png); background-size:300% 300%; background-color:var(--panel2); border:3px solid var(--line); }
   .dept .av { display:block; margin:0 auto; box-shadow:0 4px 14px rgba(0,0,0,.45); transition:transform .15s; }
   .dept .name { display:block; width:max-content; max-width:112px; font-size:10px; font-weight:700; line-height:1.5; margin:3px auto 0; padding:2px 5px; border-radius:4px; background:rgba(16,18,28,.9); color:#fff; }
@@ -221,7 +224,7 @@ const STATUS = {
   alert: {label:'要対応', color:'var(--alert)'},
   unknown: {label:'取得不明', color:'var(--unknown)'}
 };
-const WORK_STATUS = {working:{label:'作業中',color:'var(--ok)'}, waiting:{label:'確認待ち',color:'var(--accent)'}, idle:{label:'待機中',color:'var(--idle)'}, alert:{label:'要対応',color:'var(--alert)'}, unknown:{label:'状況未確認',color:'var(--unknown)'}};
+const WORK_STATUS = {working:{label:'作業中',color:'var(--ok)'}, waiting:{label:'確認待ち',color:'var(--accent)'}, idle:{label:'待機中',color:'var(--idle)'}, alert:{label:'要対応',color:'var(--alert)'}, recorded:{label:'作業記録あり',color:'var(--accent2)'}, unknown:{label:'情報なし',color:'var(--unknown)'}};
 const WORK_SLUGS = new Set(['executive','venture','market','eng','qa','finance','it','hr','digest','chatgpt']);
 const workFeeds = new Map();
 let workFeedLoading = false;
@@ -263,6 +266,7 @@ function taskLabel(value) {
 }
 function sourceLabel(source) {
   if (source.mode === 'issues_file') return '保存済みのGitHub issue一覧';
+  if (source.mode === 'connector') return 'GitHub接続';
   return source.mode === 'github' || source.mode === 'api' ? 'GitHub API' : 'GitHub（取得方法未確認）';
 }
 function validMap(value) {
@@ -292,6 +296,18 @@ function sameWork(a, b) {
     Date.parse(a.updatedAt) === Date.parse(b.updatedAt) && Date.parse(a.validUntil) === Date.parse(b.validUntil) &&
     JSON.stringify(a.remaining) === JSON.stringify(b.remaining);
 }
+function reportActivity(item, now = Date.now()) {
+  const a = item.activity;
+  // Only the generator's explicit, linked report evidence is eligible. Do not
+  // promote arbitrary 'now' text, issue count or a future report to live work.
+  if (!a || a.kind !== 'report' || typeof a.title !== 'string' || !a.title.trim() || a.title.length > 240 ||
+      typeof a.date !== 'string' || !/^(\d{4}-\d{2}-\d{2}|\d{4}-\d{2}-\d{2}T.*(?:Z|[+-]\d{2}:\d{2}))$/.test(a.date)) return null;
+  const stamp = Date.parse(a.date.length === 10 ? a.date + 'T00:00:00+09:00' : a.date);
+  const url = safeUrl(a.url);
+  if (!Number.isFinite(stamp) || stamp > now || !url ||
+      !url.startsWith('https://github.com/halc8312/ai-company/blob/main/')) return null;
+  return {...a, stamp};
+}
 function workView(item, now = Date.now()) {
   const feed = workFeeds.get(item.slug);
   const aggregateValid = validWork(item.work, now);
@@ -307,11 +323,13 @@ function workView(item, now = Date.now()) {
   const unavailable = conflict || (direct ? feed.failed : item.historical || item.issueDataStale);
   const recorded = validWork(w, now);
   const fresh = recorded && !unavailable && now < Date.parse(w.validUntil);
-  const state = fresh ? ({blocked:'alert'}[w.state] || w.state) : 'unknown';
-  const label = fresh ? WORK_STATUS[state].label : recorded ?
+  const activity = reportActivity(item, now);
+  const newerReport = activity && (!recorded || activity.stamp > Date.parse(w.updatedAt));
+  const state = fresh ? ({blocked:'alert'}[w.state] || w.state) : (activity || recorded) ? 'recorded' : 'unknown';
+  const label = fresh ? WORK_STATUS[state].label : newerReport ? '作業記録あり' : recorded ?
     '前回：' + WORK_STATUS[({blocked:'alert'}[w.state] || w.state)].label :
     w?.reason === 'invalid' ? '記録エラー' : '記録未着';
-  return {w, fresh, recorded, state, label, unavailable};
+  return {w, fresh, recorded, state, label, unavailable, activity};
 }
 function workState(item, now = Date.now()) {
   if (!item.historical && !item.issueDataStale && (item.hasOpenAlert || item.status === 'alert')) return 'alert';
@@ -340,16 +358,39 @@ function workDetails(item) {
   const live = node('div'); section.append(live);
   watchWork(live, () => {
     const view = workView(item), w = view.recorded ? view.w : {};
-    live.replaceChildren(detailRow(view.fresh ? 'いまの作業' : '最後に記録された作業',
-      w.current || (w.state === 'idle' ? '担当の作業終了・待機の申告です。' : '担当からの作業記録がまだ届いていません。')),
-      node('p', 'contact-note', view.fresh ? '30分以内に担当が更新した作業状況です。' :
-        view.recorded ? '前回の申告を表示しています。現在も同じ状態かは未確認です。' :
-        '記録がないことは、担当の停止や故障を意味しません。'),
-      detailRow('作業状況の更新', dateLabel(w.updatedAt)),
-      detailRow('残タスク' + (view.fresh ? '' : '（前回の記録）'), w.remaining?.length ? '' : '未記載'));
+    const reportFirst = !view.fresh && view.activity && (!view.recorded || view.activity.stamp > Date.parse(w.updatedAt));
+    live.replaceChildren();
+    if (reportFirst) {
+      const report = node('div', 'report-evidence');
+      report.append(detailRow('最新の業務報告', view.activity.title),
+        detailRow('報告日時', dateLabel(view.activity.date)),
+        node('p', 'contact-note', '部署の業務報告を自動で表示しています。現在実行中という意味ではありません。残タスクは下の担当Issueから確認できます。'),
+        linkOrText('業務報告を開く', view.activity.url));
+      live.append(report);
+    }
+    if (view.recorded) {
+      const declaration = node('div', reportFirst ? 'previous-work' : 'declared-work');
+      declaration.append(detailRow(view.fresh ? 'いまの作業' : reportFirst ? '前回の作業申告（履歴）' : '最後に記録された作業',
+        w.current || (w.state === 'idle' ? '担当の作業終了・待機の申告です。' : '未記載')),
+        node('p', 'contact-note', view.fresh ? '30分以内に担当が更新した作業状況です。' : '前回の申告を表示しています。現在も同じ状態かは未確認です。'),
+        detailRow('作業状況の更新', dateLabel(w.updatedAt)),
+        detailRow('残タスク' + (view.fresh ? '' : '（前回の記録）'), w.remaining?.length ? '' : '未記載'));
+      const list = node('ul', 'work-list');
+      (w.remaining || []).forEach(t => list.append(node('li', '', t)));
+      declaration.append(list);
+      if (w.url) declaration.append(linkOrText('作業申告の根拠', w.url));
+      live.append(declaration);
+    } else if (!reportFirst) {
+      live.append(node('p', 'contact-note', '作業申告・報告とも確認できていません。記録がないことは、担当の停止や故障を意味しません。'));
+    }
     if (view.unavailable) live.append(node('p','contact-note','最新の作業記録を再確認できませんでした。'));
-    const list = node('ul', 'work-list');
-    (w.remaining || []).forEach(t => list.append(node('li', '', t))); live.append(list);
+    if (view.activity && !reportFirst) {
+      live.append(detailRow('最新の業務報告', view.activity.title),
+        detailRow('報告日時', dateLabel(view.activity.date)),
+        linkOrText('業務報告を開く', view.activity.url));
+    }
+    if (!view.fresh && item.work?.reason === 'invalid')
+      live.append(node('p', 'contact-note', '作業申告の形式エラーがあります。業務報告とは別に再確認が必要です。'));
   });
   const tasks = Array.isArray(item.tasks) ? item.tasks : [];
   section.append(detailRow('担当Issue' + (item.historical || item.issueDataStale ? '（前回取得値）' : ''),
@@ -358,6 +399,7 @@ function workDetails(item) {
     const box = node('div', 'work-task');
     box.append(linkOrText('#' + task.num + ' ' + task.title, issueUrl(task)));
     if (task.waitingHuman) box.append(node('p', 'contact-note', '人間への確認事項あり（ラベルに基づく）'));
+    if (task.reviewRequested) box.append(node('p', 'contact-note', 'レビュー依頼中（Issueラベルに基づく）'));
     const todo = node('ul', 'work-list');
     (Array.isArray(task.remaining) ? task.remaining.slice(0,12) : []).forEach(t => todo.append(node('li','',t)));
     box.append(todo, node('p','contact-note','全項目と最新の進捗はIssueで確認'));
@@ -772,13 +814,13 @@ function renderBoard(depts, historical = false, recordedAt = null) {
     const card = node('div', 'count');
     const number = node('div', 'n', counts[key]);
     number.style.color = config.color;
-    card.append(number, node('div', 'l', key === 'unknown' ? '更新待ち・記録未着' : config.label)); cards.append(card);
+    card.append(number, node('div', 'l', config.label)); cards.append(card);
   });
-  board.append(cards, node('p','note', '30分以内の申告を現在の状況として集計。古い申告は「前回」として席に残し、作業中の人数には含めません。'));
-  const missing = depts.filter(d => !workView(d).recorded).length;
-  const previous = depts.filter(d => workView(d).recorded && !workView(d).fresh).length;
+  board.append(cards, node('p','note', '作業中・確認待ち・待機中は30分以内の本人申告。作業記録ありは業務報告や前回の申告で、現在の稼働人数には含めません。'));
+  const missing = depts.filter(d => !workView(d).recorded && !workView(d).activity).length;
+  const previous = depts.filter(d => !workView(d).fresh && (workView(d).recorded || workView(d).activity)).length;
   document.getElementById('workNotice').textContent = missing || previous ?
-    `作業状況：${missing}部署は記録未着・記録エラー、${previous}部署は前回の申告です。タップで最後の作業と残タスクを確認できます。` :
+    `仕事内容・残タスクは席をタップ。${previous}部署は業務報告・前回の申告を表示${missing ? '、' + missing + '部署は情報なし' : ''}。` :
     '各担当の作業状況を受信しています。';
   });
 }
