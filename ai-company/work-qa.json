@@ -1,0 +1,1 @@
+{"schemaVersion": 1, "slug": "qa", "work": {"state": "working", "current": "巡回40: PR#79検証・マージ完了。#75配信経路の実測(qa --publish)", "remaining": ["#75 2回目の状態遷移を公開画面で実測"], "updatedAt": "2026-09-27T18:50:40.350+09:00", "validUntil": "2026-09-27T19:20:40.350+09:00", "url": "https://github.com/halc8312/ai-company/blob/main/reports/qa/work-status.json"}}
