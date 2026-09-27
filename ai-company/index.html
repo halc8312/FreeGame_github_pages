@@ -178,6 +178,7 @@
 <main>
 <div class="mapwrap">
   <p class="map-hint" id="mapHint">席をタップすると作業内容・残タスク・「話しかける」を開けます。狭い画面ではマップを左右にスワイプできます。キーボードでも部署を選べます。</p>
+  <p class="map-hint" id="workNotice" role="status"></p>
   <div class="map-scroll" tabindex="0" aria-label="オフィスマップ。各部署を選ぶと詳細が開きます。" aria-describedby="mapHint">
     <div class="floor">
       <img class="map" src="assets/office-map.png" width="1536" height="1024" alt="AI Companyのオフィス見取り図">
@@ -221,6 +222,9 @@ const STATUS = {
   unknown: {label:'取得不明', color:'var(--unknown)'}
 };
 const WORK_STATUS = {working:{label:'作業中',color:'var(--ok)'}, waiting:{label:'確認待ち',color:'var(--accent)'}, idle:{label:'待機中',color:'var(--idle)'}, alert:{label:'要対応',color:'var(--alert)'}, unknown:{label:'状況未確認',color:'var(--unknown)'}};
+const WORK_SLUGS = new Set(['executive','venture','market','eng','qa','finance','it','hr','digest','chatgpt']);
+const workFeeds = new Map();
+let workFeedLoading = false;
 const popup = document.getElementById('popup');
 let returnFocus = null;
 
@@ -274,14 +278,47 @@ function avatar(item) {
   else { element.classList.add('external'); element.textContent = 'AI'; }
   return element;
 }
-function workState(item, now = Date.now()) {
-  if (item.historical || item.issueDataStale) return 'unknown';
-  if (item.hasOpenAlert || item.status === 'alert') return 'alert';
-  const w = item.work;
+function validWork(w, now = Date.now()) {
+  const zoned = v => typeof v === 'string' && /T.*(?:Z|[+-]\d{2}:\d{2})$/.test(v);
   const updated = Date.parse(w?.updatedAt), until = Date.parse(w?.validUntil);
-  if (!w || !Number.isFinite(updated) || !Number.isFinite(until) || updated > now ||
-      until <= updated || until - updated > 30 * 60000 || now >= until) return 'unknown';
-  return ({working:'working',waiting:'waiting',idle:'idle',blocked:'alert'})[w.state] || 'unknown';
+  return w && ['working','waiting','idle','blocked'].includes(w.state) &&
+    typeof w.current === 'string' && w.current.length <= 240 && (w.state === 'idle' || w.current.trim()) &&
+    Array.isArray(w.remaining) && w.remaining.length <= 12 && w.remaining.every(v => typeof v === 'string' && v.trim() && v.length <= 240) &&
+    zoned(w.updatedAt) && zoned(w.validUntil) && Number.isFinite(updated) && Number.isFinite(until) &&
+    updated <= now && until > updated && until - updated <= 30 * 60000;
+}
+function sameWork(a, b) {
+  return a.state === b.state && a.current === b.current &&
+    Date.parse(a.updatedAt) === Date.parse(b.updatedAt) && Date.parse(a.validUntil) === Date.parse(b.validUntil) &&
+    JSON.stringify(a.remaining) === JSON.stringify(b.remaining);
+}
+function workView(item, now = Date.now()) {
+  const feed = workFeeds.get(item.slug);
+  const aggregateValid = validWork(item.work, now);
+  const feedValid = feed && validWork(feed.work, now);
+  const sameTime = aggregateValid && feedValid && Date.parse(feed.work.updatedAt) === Date.parse(item.work.updatedAt);
+  const conflict = sameTime && !sameWork(feed.work, item.work);
+  const aggregateConfirmed = aggregateValid && !item.historical && !item.issueDataStale;
+  // One failed transport cannot invalidate the identical record confirmed by
+  // the other. Never resurrect an older aggregate over a newer failed feed.
+  const direct = feedValid && (!aggregateValid || Date.parse(feed.work.updatedAt) >= Date.parse(item.work.updatedAt)) &&
+    !(feed.failed && sameTime && !conflict && aggregateConfirmed);
+  const w = direct ? feed.work : item.work;
+  const unavailable = conflict || (direct ? feed.failed : item.historical || item.issueDataStale);
+  const recorded = validWork(w, now);
+  const fresh = recorded && !unavailable && now < Date.parse(w.validUntil);
+  const state = fresh ? ({blocked:'alert'}[w.state] || w.state) : 'unknown';
+  const label = fresh ? WORK_STATUS[state].label : recorded ?
+    '前回：' + WORK_STATUS[({blocked:'alert'}[w.state] || w.state)].label :
+    w?.reason === 'invalid' ? '記録エラー' : '記録未着';
+  return {w, fresh, recorded, state, label, unavailable};
+}
+function workState(item, now = Date.now()) {
+  if (!item.historical && !item.issueDataStale && (item.hasOpenAlert || item.status === 'alert')) return 'alert';
+  return workView(item, now).state;
+}
+function workLabel(item) {
+  return workState(item) === 'alert' ? WORK_STATUS.alert.label : workView(item).label;
 }
 const workWatchers = new Map();
 function watchWork(element, refresh) { workWatchers.set(element, refresh); refresh(); }
@@ -294,28 +331,26 @@ function badge(item) {
   const element = node('span');
   watchWork(element, () => {
     const state = workState(item);
-    element.className = 'bubble ' + state; element.textContent = WORK_STATUS[state].label;
+    element.className = 'bubble ' + state; element.textContent = workLabel(item);
   });
   return element;
 }
 function workDetails(item) {
   const section = node('section', 'work-details');
-  const w = item.work || {};
-  const fresh = () => w.state && workState({...item,status:'no_report',hasOpenAlert:false}) !== 'unknown';
-  const current = fresh();
-  const heading = detailRow('', w.current || '作業内容はまだ届いていません。');
-  const note = node('p', 'contact-note');
-  section.append(heading, note);
-  watchWork(section, () => {
-    heading.childNodes[0].textContent = fresh() ? 'いまの作業' : '最後に記録された作業';
-    note.textContent = fresh() ? '担当が更新した作業状況です。' : '現在の状況は未確認です。作業の記録は30分で期限切れになります。';
+  const live = node('div'); section.append(live);
+  watchWork(live, () => {
+    const view = workView(item), w = view.recorded ? view.w : {};
+    live.replaceChildren(detailRow(view.fresh ? 'いまの作業' : '最後に記録された作業',
+      w.current || (w.state === 'idle' ? '担当の作業終了・待機の申告です。' : '担当からの作業記録がまだ届いていません。')),
+      node('p', 'contact-note', view.fresh ? '30分以内に担当が更新した作業状況です。' :
+        view.recorded ? '前回の申告を表示しています。現在も同じ状態かは未確認です。' :
+        '記録がないことは、担当の停止や故障を意味しません。'),
+      detailRow('作業状況の更新', dateLabel(w.updatedAt)),
+      detailRow('残タスク' + (view.fresh ? '' : '（前回の記録）'), w.remaining?.length ? '' : '未記載'));
+    if (view.unavailable) live.append(node('p','contact-note','最新の作業記録を再確認できませんでした。'));
+    const list = node('ul', 'work-list');
+    (w.remaining || []).forEach(t => list.append(node('li', '', t))); live.append(list);
   });
-  if (w.updatedAt) section.append(detailRow('作業状況の更新', dateLabel(w.updatedAt)));
-  section.append(detailRow('残タスク' + (current ? '' : '（前回の記録）'),
-    Array.isArray(w.remaining) && w.remaining.length ? '' : '未記載'));
-  const list = node('ul', 'work-list');
-  (Array.isArray(w.remaining) ? w.remaining.slice(0,12) : []).forEach(t => list.append(node('li', '', t)));
-  section.append(list);
   const tasks = Array.isArray(item.tasks) ? item.tasks : [];
   section.append(detailRow('担当Issue' + (item.historical || item.issueDataStale ? '（前回取得値）' : ''),
     tasks.length ? '未チェック項目はIssueの記録です。現在着手中とは限りません。' : '一覧未取得または担当Issueなし'));
@@ -717,7 +752,7 @@ function renderMarkers(depts, sourceError) {
     marker.style.top = dept.map.pos[1] + '%';
     watchWork(marker, () => {
       marker.className = 'dept ' + workState(dept) + (dept.historical ? ' historical' : '');
-      marker.setAttribute('aria-label', dept.name + '：' + WORK_STATUS[workState(dept)].label + '。タップして作業と残タスクを見る');
+      marker.setAttribute('aria-label', dept.name + '：' + workLabel(dept) + '。タップして作業と残タスクを見る');
     });
     marker.setAttribute('aria-haspopup', 'dialog');
     marker.setAttribute('aria-controls', 'popup');
@@ -731,15 +766,20 @@ function renderBoard(depts, historical = false, recordedAt = null) {
   watchWork(board, () => {
   const counts = Object.fromEntries(Object.keys(WORK_STATUS).map(key => [key, 0]));
   depts.forEach(dept => { counts[workState(dept)]++; });
-  board.replaceChildren(node('h3', '', (historical ? '前回取得時の部署状況' : '部署の作業状況') + ' · ' + depts.length + '部署'));
+  board.replaceChildren(node('h3', '', (historical && !depts.some(d => workView(d).fresh) ? '前回取得時の部署状況' : '部署の作業状況') + ' · ' + depts.length + '部署'));
   const cards = node('div', 'counts');
   Object.entries(WORK_STATUS).forEach(([key, config]) => {
     const card = node('div', 'count');
     const number = node('div', 'n', counts[key]);
     number.style.color = config.color;
-    card.append(number, node('div', 'l', config.label)); cards.append(card);
+    card.append(number, node('div', 'l', key === 'unknown' ? '更新待ち・記録未着' : config.label)); cards.append(card);
   });
-  board.append(cards, node('p','note', '担当による作業状況の記録。30分以内の更新だけを表示します。席をタップすると作業内容と残タスクを確認できます。'));
+  board.append(cards, node('p','note', '30分以内の申告を現在の状況として集計。古い申告は「前回」として席に残し、作業中の人数には含めません。'));
+  const missing = depts.filter(d => !workView(d).recorded).length;
+  const previous = depts.filter(d => workView(d).recorded && !workView(d).fresh).length;
+  document.getElementById('workNotice').textContent = missing || previous ?
+    `作業状況：${missing}部署は記録未着・記録エラー、${previous}部署は前回の申告です。タップで最後の作業と残タスクを確認できます。` :
+    '各担当の作業状況を受信しています。';
   });
 }
 // Label counts are not proof of unanswered requests or outstanding approvals.
@@ -920,6 +960,34 @@ const STALE_MS = 150 * 60 * 1000; // 集計周期2h + 30分余裕(issue #44 で�
 let lastData = null;
 let lastLoadedAt = null;
 let loading = false;
+async function loadWorkFeeds() {
+  if (workFeedLoading || !lastData) return;
+  workFeedLoading = true;
+  try {
+    const slugs = [...new Set([...lastData.depts, ...lastData.collaborators].map(d => d.slug))].filter(s => WORK_SLUGS.has(s));
+    await Promise.allSettled(slugs.map(async slug => {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 10000);
+      try {
+        const response = await fetch('https://halc8312.github.io/FreeGame_github_pages/ai-company/work-' + slug + '.json',
+          {cache:'no-store', credentials:'omit', signal:controller.signal});
+        if (!response.ok) throw new Error('unavailable');
+        const data = await response.json();
+        if (data.schemaVersion !== 1 || data.slug !== slug || !validWork(data.work)) throw new Error('invalid');
+        const previous = workFeeds.get(slug);
+        if (previous && Date.parse(data.work.updatedAt) < Date.parse(previous.work.updatedAt)) throw new Error('older');
+        if (previous && Date.parse(data.work.updatedAt) === Date.parse(previous.work.updatedAt) &&
+            !sameWork(data.work, previous.work)) throw new Error('conflicting timestamp');
+        workFeeds.set(slug, {work:data.work, failed:false});
+      } catch (_) {
+        const previous = workFeeds.get(slug);
+        if (previous) workFeeds.set(slug, {...previous, failed:true});
+      } finally { clearTimeout(timer); }
+    }));
+    // Update only work sections. Keep the dialog, keyboard focus and chat draft.
+    refreshWorkViews();
+  } finally { workFeedLoading = false; }
+}
 function dataAge(data, now = Date.now()) {
   const times = [data.generatedAt, data.sources.github.lastSuccessAt].map(value =>
     typeof value === 'string' && /T.*(?:Z|[+-]\d{2}:\d{2})$/.test(value) ? Date.parse(value) : NaN);
@@ -997,6 +1065,7 @@ async function loadData() {
       else showLoadError('通信または配信データを確認してください。各IssueはGitHubから確認できます。');
     }
   } finally { loading = false; refresh.disabled = false; }
+  await loadWorkFeeds();
 }
 document.getElementById('refresh').addEventListener('click', loadData);
 loadData();
@@ -1005,6 +1074,7 @@ setInterval(() => {
   // 入力中の回答や開いている詳細を自動更新で失わせない。
   if (popup.open || document.querySelector('.answer-draft:focus') ||
       [...document.querySelectorAll('.answer-draft')].some(input => input.value)) {
+    loadWorkFeeds();
     if (lastData && staleData(lastData)) {
       const notice = document.getElementById('notice');
       notice.hidden = false;
