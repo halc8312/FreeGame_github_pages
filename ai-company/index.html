@@ -282,18 +282,26 @@ function avatar(item) {
   else { element.classList.add('external'); element.textContent = 'AI'; }
   return element;
 }
+function workTime(value) {
+  if (typeof value !== 'string') return NaN;
+  const fraction = value.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.(\d{1,6}))?(?:Z|[+-]\d{2}:\d{2})$/);
+  const milliseconds = Date.parse(value);
+  if (!fraction || !Number.isFinite(milliseconds)) return NaN;
+  const microseconds = Number(((fraction[1] || '') + '000000').slice(0, 6));
+  return milliseconds * 1000 + microseconds % 1000;
+}
 function validWork(w, now = Date.now()) {
   const zoned = v => typeof v === 'string' && /T.*(?:Z|[+-]\d{2}:\d{2})$/.test(v);
-  const updated = Date.parse(w?.updatedAt), until = Date.parse(w?.validUntil);
+  const updated = workTime(w?.updatedAt), until = workTime(w?.validUntil);
   return w && ['working','waiting','idle','blocked'].includes(w.state) &&
     typeof w.current === 'string' && w.current.length <= 240 && (w.state === 'idle' || w.current.trim()) &&
     Array.isArray(w.remaining) && w.remaining.length <= 12 && w.remaining.every(v => typeof v === 'string' && v.trim() && v.length <= 240) &&
     zoned(w.updatedAt) && zoned(w.validUntil) && Number.isFinite(updated) && Number.isFinite(until) &&
-    updated <= now && until > updated && until - updated <= 30 * 60000;
+    updated <= now * 1000 && until > updated && until - updated <= 30 * 60000 * 1000;
 }
 function sameWork(a, b) {
   return a.state === b.state && a.current === b.current &&
-    Date.parse(a.updatedAt) === Date.parse(b.updatedAt) && Date.parse(a.validUntil) === Date.parse(b.validUntil) &&
+    workTime(a.updatedAt) === workTime(b.updatedAt) && workTime(a.validUntil) === workTime(b.validUntil) &&
     JSON.stringify(a.remaining) === JSON.stringify(b.remaining);
 }
 function reportActivity(item, now = Date.now()) {
@@ -312,12 +320,12 @@ function workView(item, now = Date.now()) {
   const feed = workFeeds.get(item.slug);
   const aggregateValid = validWork(item.work, now);
   const feedValid = feed && validWork(feed.work, now);
-  const sameTime = aggregateValid && feedValid && Date.parse(feed.work.updatedAt) === Date.parse(item.work.updatedAt);
+  const sameTime = aggregateValid && feedValid && workTime(feed.work.updatedAt) === workTime(item.work.updatedAt);
   const conflict = sameTime && !sameWork(feed.work, item.work);
   const aggregateConfirmed = aggregateValid && !item.historical && !item.issueDataStale;
   // One failed transport cannot invalidate the identical record confirmed by
   // the other. Never resurrect an older aggregate over a newer failed feed.
-  const direct = feedValid && (!aggregateValid || Date.parse(feed.work.updatedAt) >= Date.parse(item.work.updatedAt)) &&
+  const direct = feedValid && (!aggregateValid || workTime(feed.work.updatedAt) >= workTime(item.work.updatedAt)) &&
     !(feed.failed && sameTime && !conflict && aggregateConfirmed);
   const w = direct ? feed.work : item.work;
   const unavailable = conflict || (direct ? feed.failed : item.historical || item.issueDataStale);
@@ -1017,8 +1025,8 @@ async function loadWorkFeeds() {
         const data = await response.json();
         if (data.schemaVersion !== 1 || data.slug !== slug || !validWork(data.work)) throw new Error('invalid');
         const previous = workFeeds.get(slug);
-        if (previous && Date.parse(data.work.updatedAt) < Date.parse(previous.work.updatedAt)) throw new Error('older');
-        if (previous && Date.parse(data.work.updatedAt) === Date.parse(previous.work.updatedAt) &&
+        if (previous && workTime(data.work.updatedAt) < workTime(previous.work.updatedAt)) throw new Error('older');
+        if (previous && workTime(data.work.updatedAt) === workTime(previous.work.updatedAt) &&
             !sameWork(data.work, previous.work)) throw new Error('conflicting timestamp');
         workFeeds.set(slug, {work:data.work, failed:false});
       } catch (_) {
