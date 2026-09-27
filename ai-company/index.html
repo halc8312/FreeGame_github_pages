@@ -30,6 +30,14 @@
   .transport.error { color:var(--alert); }
   .retry { margin-top:8px; padding:8px 12px; border:1px solid var(--line); border-radius:7px; background:var(--panel2); cursor:pointer; }
   .retry:disabled { opacity:.6; cursor:wait; }
+  .todo { max-width:1168px; margin:0 auto 12px; padding:0 16px; display:flex; flex-wrap:wrap; gap:8px; }
+  .todo-item { display:inline-flex; align-items:center; gap:8px; min-height:40px; padding:8px 14px; border:1px solid var(--line); border-radius:10px; background:var(--panel); color:var(--text); font-size:13px; text-decoration:none; }
+  .todo-item strong { font-size:16px; }
+  .todo-item.need { border-color:var(--accent); }
+  .todo-item.need strong { color:var(--accent); }
+  .todo-item.alert { border-color:var(--alert); }
+  .todo-item.alert strong { color:var(--alert); }
+  .todo-item.clear { color:var(--dim); }
 
   /* The map and its markers share one coordinate system, independent of the board. */
   .mapwrap { position:relative; width:100%; max-width:1200px; margin:0 auto; }
@@ -157,6 +165,7 @@
   <button class="retry" id="refresh" type="button">配信データを再確認</button>
   <div class="transport" id="transport" role="status" hidden></div>
 </div>
+<nav class="todo" id="todo" aria-label="対応が必要なもの" hidden></nav>
 <noscript><div class="notice error">最新の状態を表示するにはJavaScriptを有効にしてください。</div></noscript>
 
 <main>
@@ -179,7 +188,7 @@
 <h2>▼ 外部協力</h2>
 <p class="section-note">必要な作業に参加する協力者です。常駐部署の集計には含めません。</p>
 <div class="collaborators" id="collaborators"><p class="empty">データを読み込んでいます</p></div>
-<h2>▼ 人間の対応事項 (needs-human)</h2>
+<h2 id="needsTitle">▼ 人間の対応事項 (needs-human)</h2>
 <p class="section-note">ラベルに基づく一覧。回答済みの記録を含む場合があります。候補は下書きです。GitHubにログインしてIssueへ投稿してください。承認権限と回答の意味は担当部署が確認します。</p>
 <div class="list" id="needs"><div class="row empty">データを読み込んでいます</div></div>
 <h2>▼ 進行中の事業提案</h2>
@@ -189,7 +198,9 @@
 <footer class="footer">
   リポジトリ: <a href="https://github.com/halc8312/ai-company">halc8312/ai-company</a> ·
   Slack: #ai-company / #ai-company-chat / #ai-company-meeting<br>
-  報告ファイルとGitHubのissueから集計した状態です。セッションの実行状況を直接監視するものではありません。
+  報告ファイルとGitHubのissueから集計した状態です。セッションの実行状況を直接監視するものではありません。<br>
+  使い方: <a href="https://github.com/halc8312/ai-company/blob/main/handbook/HALCY_GUIDE.md">社長ガイド</a> ·
+  <a href="https://github.com/halc8312/ai-company/blob/main/handbook/GLOSSARY.md">用語集</a>
 </footer>
 </div>
 </main>
@@ -665,6 +676,29 @@ function renderBoard(depts, historical = false, recordedAt = null) {
   });
   board.append(cards, node('p', 'note', (historical ? dateLabel(recordedAt) + '時点の記録です。現在の状態は未確認。' : '当日＝JST。') + '報告・コミット・Issueに基づく分類で、実行中を表すものではありません。'));
 }
+// Label counts are not proof of unanswered requests or outstanding approvals.
+function renderTodo(needs, depts, sourceError) {
+  const todo = document.getElementById('todo');
+  todo.replaceChildren();
+  const prefix = sourceError ? '前回取得時 ' : '';
+  const need = node('a', 'todo-item ' + (needs.length ? 'need' : 'clear'));
+  need.href = '#needsTitle';
+  need.setAttribute('data-office-focus', 'summary:needs');
+  if (needs.length) need.append(node('span', '', prefix + '人間の確認対象（ラベル付き）'), node('strong', '', needs.length + '件'));
+  else need.textContent = sourceError ? '確認対象は取得不明（下の一覧を確認）' : '取得時点の確認対象：0件' ;
+  todo.append(need);
+  const alerts = depts.filter(dept => statusOf(dept) === 'alert');
+  if (alerts.length) {
+    const alert = linkOrText('', 'https://github.com/halc8312/ai-company/issues?q=' +
+      encodeURIComponent('is:issue is:open label:type:alert'), 'todo-item alert');
+    alert.append(node('span', '', prefix + '要対応の部署'), node('strong', '', alerts.length),
+      node('span', '', alerts.map(dept => dept.name).join('、')));
+    alert.target = '_blank';
+    alert.setAttribute('data-office-focus', 'summary:alerts');
+    todo.append(alert);
+  }
+  todo.hidden = false;
+}
 function renderCollaborators(items, sourceError) {
   const area = document.getElementById('collaborators');
   area.replaceChildren();
@@ -785,6 +819,7 @@ function render(data, historical = false) {
   renderNotice(data);
   renderMarkers(data.depts, sourceError);
   renderBoard(data.depts, historical, data.sources.github.lastSuccessAt);
+  renderTodo(data.needsHuman, data.depts, sourceError);
   renderCollaborators(data.collaborators, sourceError);
   renderAnswers(data.needsHuman, sourceError);
   renderIssues('proposals', data.proposals, '提案', 'prop', sourceError);
@@ -806,6 +841,7 @@ function showLoadError(message) {
   document.getElementById('updated').textContent = 'データ取得に失敗しました';
   document.getElementById('sourceTime').textContent = '最終成功時刻は確認できません';
   document.getElementById('markers').replaceChildren();
+  document.getElementById('todo').hidden = true;
   document.getElementById('board').replaceChildren(node('h3', '', '部署の報告状況'), node('p', 'empty', '取得不明'));
   document.getElementById('collaborators').replaceChildren(node('p', 'empty', '取得不明'));
   ['needs', 'proposals', 'reports'].forEach(id => document.getElementById(id).replaceChildren(node('div', 'row empty', '取得不明')));
