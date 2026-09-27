@@ -639,6 +639,7 @@ function renderMarkers(depts, sourceError) {
   depts.filter(d => validMap(d.map)).forEach(dept => {
     const marker = node('button', 'dept ' + statusOf(dept) + (dept.historical ? ' historical' : ''));
     marker.type = 'button';
+    marker.setAttribute('data-office-focus', 'department:' + dept.slug);
     marker.style.left = dept.map.pos[0] + '%';
     marker.style.top = dept.map.pos[1] + '%';
     marker.setAttribute('aria-label', dept.name + '：' + statusLabel(statusOf(dept), dept.historical));
@@ -671,6 +672,7 @@ function renderCollaborators(items, sourceError) {
   items.forEach(item => {
     const card = node('button', 'collaborator-card');
     card.type = 'button';
+    card.setAttribute('data-office-focus', 'collaborator:' + item.slug);
     card.setAttribute('aria-haspopup', 'dialog');
     card.setAttribute('aria-controls', 'popup');
     card.append(node('span', 'provider', [item.provider, '外部協力'].filter(Boolean).join(' · ')),
@@ -773,6 +775,9 @@ function renderNotice(data) {
   notice.hidden = !notice.childNodes.length;
 }
 function render(data, historical = false) {
+  // Capture immediately before replacement, not before the asynchronous fetch:
+  // the user may have moved focus while the request was in flight.
+  const focusKey = document.activeElement?.getAttribute('data-office-focus');
   const sourceError = historical || data.sources.github.status === 'error';
   document.getElementById('subtitle').textContent = '収益機会を組織的に発掘・検証するAI会社 · ' + data.depts.length + '部署';
   document.getElementById('updated').textContent = 'データ生成: ' + dateLabel(data.generatedAt);
@@ -784,6 +789,11 @@ function render(data, historical = false) {
   renderAnswers(data.needsHuman, sourceError);
   renderIssues('proposals', data.proposals, '提案', 'prop', sourceError);
   renderReports(data.reports);
+  if (focusKey) {
+    const replacement = [...document.querySelectorAll('[data-office-focus]')]
+      .find(element => element.getAttribute('data-office-focus') === focusKey);
+    replacement?.focus({preventScroll:true});
+  }
 }
 function showLoadError(message) {
   const notice = document.getElementById('notice');
