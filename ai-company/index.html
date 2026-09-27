@@ -47,6 +47,13 @@
   .dept { position:absolute; transform:translate(-50%,-50%); cursor:pointer; text-align:center; width:112px; min-height:64px; border:0; background:none; border-radius:10px; }
   .bubble { font-size:10px; font-weight:700; padding:2px 8px; border-radius:99px; white-space:nowrap; background:var(--panel2); border:1px solid var(--line); color:var(--dim); }
   .dept .bubble { position:absolute; top:-14px; left:50%; transform:translateX(-50%); }
+  .bubble.working { background:#193a32; color:var(--ok); border-color:var(--ok); }
+  .bubble.waiting { color:var(--accent); border-color:var(--accent); }
+  .bubble.idle { color:var(--idle); }
+  .dept.working .av { border-color:var(--ok); }
+  .dept.waiting .av { border-color:var(--accent); }
+  .work-list { padding-left:18px; margin-top:6px; line-height:1.8; font-size:13px; overflow-wrap:anywhere; }
+  .work-task { margin-top:14px; padding-top:10px; border-top:1px solid var(--line); }
   .bubble.reported { background:#193a32; color:var(--ok); border-color:var(--ok); }
   .bubble.no_report { background:var(--panel2); color:var(--dim); border-color:var(--idle); }
   .bubble.alert { background:#462730; color:var(--alert); border-color:var(--alert); }
@@ -170,7 +177,7 @@
 
 <main>
 <div class="mapwrap">
-  <p class="map-hint" id="mapHint">席のアイコンから詳細・「話しかける」を開けます。狭い画面ではマップを左右にスワイプできます。キーボードでも部署を選べます。</p>
+  <p class="map-hint" id="mapHint">席をタップすると作業内容・残タスク・「話しかける」を開けます。狭い画面ではマップを左右にスワイプできます。キーボードでも部署を選べます。</p>
   <div class="map-scroll" tabindex="0" aria-label="オフィスマップ。各部署を選ぶと詳細が開きます。" aria-describedby="mapHint">
     <div class="floor">
       <img class="map" src="assets/office-map.png" width="1536" height="1024" alt="AI Companyのオフィス見取り図">
@@ -213,6 +220,7 @@ const STATUS = {
   alert: {label:'要対応', color:'var(--alert)'},
   unknown: {label:'取得不明', color:'var(--unknown)'}
 };
+const WORK_STATUS = {working:{label:'作業中',color:'var(--ok)'}, waiting:{label:'確認待ち',color:'var(--accent)'}, idle:{label:'待機中',color:'var(--idle)'}, alert:{label:'要対応',color:'var(--alert)'}, unknown:{label:'状況未確認',color:'var(--unknown)'}};
 const popup = document.getElementById('popup');
 let returnFocus = null;
 
@@ -266,9 +274,63 @@ function avatar(item) {
   else { element.classList.add('external'); element.textContent = 'AI'; }
   return element;
 }
+function workState(item, now = Date.now()) {
+  if (item.historical || item.issueDataStale) return 'unknown';
+  if (item.hasOpenAlert || item.status === 'alert') return 'alert';
+  const w = item.work;
+  const updated = Date.parse(w?.updatedAt), until = Date.parse(w?.validUntil);
+  if (!w || !Number.isFinite(updated) || !Number.isFinite(until) || updated > now ||
+      until <= updated || until - updated > 30 * 60000 || now >= until) return 'unknown';
+  return ({working:'working',waiting:'waiting',idle:'idle',blocked:'alert'})[w.state] || 'unknown';
+}
+const workWatchers = new Map();
+function watchWork(element, refresh) { workWatchers.set(element, refresh); refresh(); }
+function refreshWorkViews() {
+  for (const [element, refresh] of workWatchers) {
+    if (element.isConnected === false) workWatchers.delete(element); else refresh();
+  }
+}
 function badge(item) {
-  const status = statusOf(item);
-  return node('span', 'bubble ' + status, statusLabel(status, item.historical));
+  const element = node('span');
+  watchWork(element, () => {
+    const state = workState(item);
+    element.className = 'bubble ' + state; element.textContent = WORK_STATUS[state].label;
+  });
+  return element;
+}
+function workDetails(item) {
+  const section = node('section', 'work-details');
+  const w = item.work || {};
+  const fresh = () => w.state && workState({...item,status:'no_report',hasOpenAlert:false}) !== 'unknown';
+  const current = fresh();
+  const heading = detailRow('', w.current || '作業内容はまだ届いていません。');
+  const note = node('p', 'contact-note');
+  section.append(heading, note);
+  watchWork(section, () => {
+    heading.childNodes[0].textContent = fresh() ? 'いまの作業' : '最後に記録された作業';
+    note.textContent = fresh() ? '担当が更新した作業状況です。' : '現在の状況は未確認です。作業の記録は30分で期限切れになります。';
+  });
+  if (w.updatedAt) section.append(detailRow('作業状況の更新', dateLabel(w.updatedAt)));
+  section.append(detailRow('残タスク' + (current ? '' : '（前回の記録）'),
+    Array.isArray(w.remaining) && w.remaining.length ? '' : '未記載'));
+  const list = node('ul', 'work-list');
+  (Array.isArray(w.remaining) ? w.remaining.slice(0,12) : []).forEach(t => list.append(node('li', '', t)));
+  section.append(list);
+  const tasks = Array.isArray(item.tasks) ? item.tasks : [];
+  section.append(detailRow('担当Issue' + (item.historical || item.issueDataStale ? '（前回取得値）' : ''),
+    tasks.length ? '未チェック項目はIssueの記録です。現在着手中とは限りません。' : '一覧未取得または担当Issueなし'));
+  tasks.slice(0,20).forEach(task => {
+    const box = node('div', 'work-task');
+    box.append(linkOrText('#' + task.num + ' ' + task.title, issueUrl(task)));
+    if (task.waitingHuman) box.append(node('p', 'contact-note', '人間への確認事項あり（ラベルに基づく）'));
+    const todo = node('ul', 'work-list');
+    (Array.isArray(task.remaining) ? task.remaining.slice(0,12) : []).forEach(t => todo.append(node('li','',t)));
+    box.append(todo, node('p','contact-note','全項目と最新の進捗はIssueで確認'));
+    section.append(box);
+  });
+  if (Number.isInteger(item.openTasks) && item.openTasks > tasks.length)
+    section.append(node('p','contact-note','Issueは先頭20件まで表示しています。'));
+  return section;
 }
 function statusLabel(status, historical = false) {
   if (!historical) return STATUS[status].label;
@@ -622,7 +684,7 @@ function openDept(item, trigger, sourceError) {
   title.id = 'popupTitle';
   info.append(title, node('div', 'role', item.role), node('div', 'role', item.provider), badge(item));
   head.append(avatar(item), info);
-  body.append(close, head, contactSection(item),
+  body.append(close, head, workDetails(item), contactSection(item),
     detailRow('最新の報告・対応内容', item.now || '報告未確認'),
     detailRow('未完了の担当issue' + (sourceError ? '（前回取得値を含む）' : ''), taskLabel(item.openTasks)),
     detailRow('次の予定', item.next || '未確認'),
@@ -648,12 +710,15 @@ function renderMarkers(depts, sourceError) {
   const markers = document.getElementById('markers');
   markers.replaceChildren();
   depts.filter(d => validMap(d.map)).forEach(dept => {
-    const marker = node('button', 'dept ' + statusOf(dept) + (dept.historical ? ' historical' : ''));
+    const marker = node('button', 'dept ' + workState(dept) + (dept.historical ? ' historical' : ''));
     marker.type = 'button';
     marker.setAttribute('data-office-focus', 'department:' + dept.slug);
     marker.style.left = dept.map.pos[0] + '%';
     marker.style.top = dept.map.pos[1] + '%';
-    marker.setAttribute('aria-label', dept.name + '：' + statusLabel(statusOf(dept), dept.historical));
+    watchWork(marker, () => {
+      marker.className = 'dept ' + workState(dept) + (dept.historical ? ' historical' : '');
+      marker.setAttribute('aria-label', dept.name + '：' + WORK_STATUS[workState(dept)].label + '。タップして作業と残タスクを見る');
+    });
     marker.setAttribute('aria-haspopup', 'dialog');
     marker.setAttribute('aria-controls', 'popup');
     marker.append(badge(dept), avatar(dept), node('span', 'name', dept.name));
@@ -663,18 +728,19 @@ function renderMarkers(depts, sourceError) {
 }
 function renderBoard(depts, historical = false, recordedAt = null) {
   const board = document.getElementById('board');
-  const counts = Object.fromEntries(Object.keys(STATUS).map(key => [key, 0]));
-  depts.forEach(dept => { counts[statusOf(dept)]++; });
-  board.replaceChildren(node('h3', '', (historical ? '前回取得時の部署状況' : '部署の活動記録') + ' · ' + depts.length + '部署'));
+  watchWork(board, () => {
+  const counts = Object.fromEntries(Object.keys(WORK_STATUS).map(key => [key, 0]));
+  depts.forEach(dept => { counts[workState(dept)]++; });
+  board.replaceChildren(node('h3', '', (historical ? '前回取得時の部署状況' : '部署の作業状況') + ' · ' + depts.length + '部署'));
   const cards = node('div', 'counts');
-  Object.entries(STATUS).forEach(([key, config]) => {
+  Object.entries(WORK_STATUS).forEach(([key, config]) => {
     const card = node('div', 'count');
     const number = node('div', 'n', counts[key]);
     number.style.color = config.color;
-    card.append(number, node('div', 'l', statusLabel(key, historical)));
-    cards.append(card);
+    card.append(number, node('div', 'l', config.label)); cards.append(card);
   });
-  board.append(cards, node('p', 'note', (historical ? dateLabel(recordedAt) + '時点の記録です。現在の状態は未確認。' : '当日＝JST。') + '報告・コミット・Issueに基づく分類で、実行中を表すものではありません。'));
+  board.append(cards, node('p','note', '担当による作業状況の記録。30分以内の更新だけを表示します。席をタップすると作業内容と残タスクを確認できます。'));
+  });
 }
 // Label counts are not proof of unanswered requests or outstanding approvals.
 function renderTodo(needs, depts, sourceError) {
@@ -711,7 +777,7 @@ function renderCollaborators(items, sourceError) {
     card.setAttribute('aria-controls', 'popup');
     card.append(node('span', 'provider', [item.provider, '外部協力'].filter(Boolean).join(' · ')),
       node('span', 'name', item.name), node('span', 'role', item.role),
-      node('span', 'summary', item.now || '報告未確認'), badge(item));
+      badge(item));
     card.addEventListener('click', () => openDept(item, card, sourceError));
     area.append(card);
   });
@@ -935,6 +1001,7 @@ async function loadData() {
 document.getElementById('refresh').addEventListener('click', loadData);
 loadData();
 setInterval(() => {
+  refreshWorkViews(); // 詳細や入力を保持していても作業表示の有効期限は更新する。
   // 入力中の回答や開いている詳細を自動更新で失わせない。
   if (popup.open || document.querySelector('.answer-draft:focus') ||
       [...document.querySelectorAll('.answer-draft')].some(input => input.value)) {
