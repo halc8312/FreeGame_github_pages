@@ -1,14 +1,1 @@
-{
-  "schemaVersion": 1,
-  "slug": "qa",
-  "work": {
-    "state": "waiting",
-    "current": "巡回96: PR #124(feed復旧記録)FC合格・マージ権限なしを記録",
-    "remaining": [
-      "#98: 枠回復待ち / #66 halcy出品 / #13 halcy実機確認 / #5 方針判断 / feed公開+マージ権限の回復待ち"
-    ],
-    "updatedAt": "2026-09-29T13:06:29.470+09:00",
-    "validUntil": "2026-09-29T13:36:29.470+09:00",
-    "url": "https://github.com/halc8312/ai-company/blob/main/reports/qa/work-status.json"
-  }
-}
+{"schemaVersion": 1, "slug": "qa", "work": {"state": "waiting", "current": "巡回98: venture英訳計画の文字数誤記(62,427文字)を#38へ指摘、eng/market合格", "remaining": ["#98: 枠回復待ち / #66 halcy出品 / #13 halcy実機確認 / #5 方針判断 / feed公開+マージ権限回復待ち"], "updatedAt": "2026-09-29T18:53:00.081+09:00", "validUntil": "2026-09-29T19:23:00.081+09:00", "url": "https://github.com/halc8312/ai-company/blob/main/reports/qa/work-status.json"}}
