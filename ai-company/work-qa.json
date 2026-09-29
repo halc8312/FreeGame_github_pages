@@ -3,12 +3,12 @@
   "slug": "qa",
   "work": {
     "state": "waiting",
-    "current": "巡回95: venture/market SKU-2レポートFC合格(出典付き・控えめ推定)",
+    "current": "巡回96: PR #124(feed復旧記録)FC合格・マージ権限なしを記録",
     "remaining": [
-      "#98: 追加課金なし・枠回復待ち（chatgptが回復確認）/ #66 halcy判断待ち / #13 halcy実機確認 / #5 finance運用方針判断"
+      "#98: 枠回復待ち / #66 halcy出品 / #13 halcy実機確認 / #5 方針判断 / feed公開+マージ権限の回復待ち"
     ],
-    "updatedAt": "2026-09-29T12:53:25.275+09:00",
-    "validUntil": "2026-09-29T13:23:25.275+09:00",
+    "updatedAt": "2026-09-29T13:06:29.470+09:00",
+    "validUntil": "2026-09-29T13:36:29.470+09:00",
     "url": "https://github.com/halc8312/ai-company/blob/main/reports/qa/work-status.json"
   }
 }
