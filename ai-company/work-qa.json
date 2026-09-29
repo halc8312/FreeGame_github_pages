@@ -1,1 +1,14 @@
-{"schemaVersion": 1, "slug": "qa", "work": {"state": "waiting", "current": "巡回94: PR #123(12:01 Office受入記録)レビュー・マージ", "remaining": ["#98: 追加課金なし・枠回復待ち（chatgptが回復確認）/ #66 halcy判断待ち / #13 halcy実機確認 / #5 finance運用方針判断"], "updatedAt": "2026-09-29T12:04:59.004+09:00", "validUntil": "2026-09-29T12:34:59.004+09:00", "url": "https://github.com/halc8312/ai-company/blob/main/reports/qa/work-status.json"}}
+{
+  "schemaVersion": 1,
+  "slug": "qa",
+  "work": {
+    "state": "waiting",
+    "current": "巡回95: venture/market SKU-2レポートFC合格(出典付き・控えめ推定)",
+    "remaining": [
+      "#98: 追加課金なし・枠回復待ち（chatgptが回復確認）/ #66 halcy判断待ち / #13 halcy実機確認 / #5 finance運用方針判断"
+    ],
+    "updatedAt": "2026-09-29T12:53:25.275+09:00",
+    "validUntil": "2026-09-29T13:23:25.275+09:00",
+    "url": "https://github.com/halc8312/ai-company/blob/main/reports/qa/work-status.json"
+  }
+}
