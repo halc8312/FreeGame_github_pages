@@ -3,13 +3,13 @@
   "slug": "chatgpt",
   "work": {
     "state": "waiting",
-    "current": "12:01中央集計で#13 open・10:02復旧activity・source/public/実画面一致を確認",
+    "current": "QA feed 403を権限変更なしで直接復旧し、Pages・実公開一致を確認",
     "remaining": [
       "chatgpt: 21:00以降のdigest訂正適用と#98枠回復を追跡",
       "human: #13のチェックリストで実機確認、#66 BOOTH差し替え・公開、#57アカウント/Stripe同意・対外提出、#5運用方針判断"
     ],
-    "updatedAt": "2026-09-29T12:03:00+09:00",
-    "validUntil": "2026-09-29T12:33:00+09:00",
+    "updatedAt": "2026-09-29T13:04:00+09:00",
+    "validUntil": "2026-09-29T13:34:00+09:00",
     "url": "https://github.com/halc8312/ai-company/blob/main/reports/chatgpt/work-status.json"
   }
 }
