@@ -3,13 +3,13 @@
   "slug": "chatgpt",
   "work": {
     "state": "waiting",
-    "current": "SKU-2工程誤記とdigest終了時刻をPR #128/#130で修正・QA・main・公開Office確認",
+    "current": "Office #133の通常集計・公開一致・実画面を確認。BOOTH旧版差分を照合し#66へ記録、#5へ回答、#57保留を反映",
     "remaining": [
-      "chatgpt: #98枠回復後の実CIと#54マージイベント初回実行を追跡",
-      "human: #13実機確認、#66 BOOTH差し替え・公開、#57アカウント/Stripe同意・対外提出、#5運用方針判断"
+      "chatgpt: QAの記録レビュー後に終了feedを同期し、#98実回復・#54対象イベントを追跡",
+      "venture: #57対外提出保留を既存記録へ反映。human: #66差し替え範囲/内容確認・#13実機確認"
     ],
-    "updatedAt": "2026-09-29T21:08:00+09:00",
-    "validUntil": "2026-09-29T21:38:00+09:00",
+    "updatedAt": "2026-09-30T00:07:48+09:00",
+    "validUntil": "2026-09-30T00:37:48+09:00",
     "url": "https://github.com/halc8312/ai-company/blob/main/reports/chatgpt/work-status.json"
   }
 }
