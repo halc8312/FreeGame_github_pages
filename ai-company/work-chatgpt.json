@@ -2,14 +2,14 @@
   "schemaVersion": 1,
   "slug": "chatgpt",
   "work": {
-    "state": "working",
-    "current": "#66 雨泊まりv2.2：全6話・終幕・裁定を統合済み。5経路の机上検証を終え、PDF全頁の改頁・参照を修正して2周目検品中。",
+    "state": "waiting",
+    "current": "#66 雨泊まりv2.2：全6話・終幕・裁定を改訂し、158/10/5頁PDFと全頁検品を完了。既存qaの独立受入待ち。BOOTH未反映。",
     "remaining": [
-      "chatgpt: 内容改訂を統合し、失敗時の進行・全3PDFと全頁目視を検証、既存QAへ渡す",
-      "chatgpt: BOOTH未反映。#13/#98/#54/#5/#57の既存残件は継続"
+      "qa: v2.2の改訂headを内容・証拠経路・裁定・配布物の観点で独立確認",
+      "chatgpt: QA受領/着手/結果を追跡し、既存BOOTHの次工程を確認。#13/#98/#54/#5/#57の既存残件は継続"
     ],
-    "updatedAt": "2026-09-30T11:26:14.423Z",
-    "validUntil": "2026-09-30T11:56:14.423Z",
+    "updatedAt": "2026-09-30T11:37:59.284Z",
+    "validUntil": "2026-09-30T12:07:59.284Z",
     "url": "https://github.com/halc8312/ai-company/blob/chatgpt/amedoma-content-v22-20260930/reports/chatgpt/work-status.json"
   }
 }
