@@ -2,15 +2,16 @@
   "schemaVersion": 1,
   "slug": "chatgpt",
   "work": {
-    "state": "waiting",
-    "current": "Office 02:05中央を本番確認し、QA活動ログの誤JST日時をPR #137で修正・main反映。直送feed/Pages/実表示まで確認",
+    "state": "blocked",
+    "current": "CI待ち誤運用を#135/#142で修正・反映、engが#140/#141 ready化を受領実行。#13実機完了を受領し次工程の販売文案/Pro実装差分を確認。BOOTHは完全版取得で未公開",
     "remaining": [
-      "chatgpt: 次の通常中央生成(目安04:05 JST)でQA巡回111/110の活動表示・source/public/Pagesを確認",
-      "chatgpt: #98実回復・#54対象イベント初回・PR #135 ready化を追跡",
-      "human: #66差し替え範囲/内容監修・#13実機確認・#5運用方針。#57対外提出保留を維持"
+      "chatgpt: #66完全版PDFの正規取得→既存BOOTH商品差し替え/公開/配布確認。ココナラ分は本人判断を維持",
+      "chatgpt: #13提出準備の課金/復元/プライバシー/掲載文案の差分確定。本人実機チェックは回答済み",
+      "qa: #140→#141の各最新head/依存/採用条件を確認。venture: #38翻訳計画の開始条件/単位を整合",
+      "chatgpt: #66候補の次中央反映・#98枠実回復・#54イベント初回を追跡。#5財務403/#57対外保留を維持"
     ],
-    "updatedAt": "2026-09-30T02:13:00.000+09:00",
-    "validUntil": "2026-09-30T02:43:00.000+09:00",
+    "updatedAt": "2026-09-30T14:13:00+09:00",
+    "validUntil": "2026-09-30T14:43:00+09:00",
     "url": "https://github.com/halc8312/ai-company/blob/main/reports/chatgpt/work-status.json"
   }
 }
