@@ -2,16 +2,15 @@
   "schemaVersion": 1,
   "slug": "chatgpt",
   "work": {
-    "state": "blocked",
-    "current": "CI待ち誤運用を#135/#142で修正・反映、engが#140/#141 ready化を受領実行。#13実機完了を受領し次工程の販売文案/Pro実装差分を確認。BOOTHは完全版取得で未公開",
+    "state": "working",
+    "current": "#66販売用原本PDFの取得経路を調査。GitHub大容量binary取得失敗をSlackファイル添付による正規受け渡しで解消する。全文閲覧用138頁と販売用136頁は区別",
     "remaining": [
-      "chatgpt: #66完全版PDFの正規取得→既存BOOTH商品差し替え/公開/配布確認。ココナラ分は本人判断を維持",
-      "chatgpt: #13提出準備の課金/復元/プライバシー/掲載文案の差分確定。本人実機チェックは回答済み",
-      "qa: #140→#141の各最新head/依存/採用条件を確認。venture: #38翻訳計画の開始条件/単位を整合",
-      "chatgpt: #66候補の次中央反映・#98枠実回復・#54イベント初回を追跡。#5財務403/#57対外保留を維持"
+      "eng: 既存mainの完全版PDF原本を#ai-companyファイル添付で引き渡し",
+      "chatgpt: 受領した原本のGit blob/SHA-256/136頁を照合し、#66承認済み範囲の既存BOOTH商品へ反映",
+      "chatgpt: #13次版差分/#98枠回復/#54初回/#5財務403/#57保留を追跡"
     ],
-    "updatedAt": "2026-09-30T14:13:00+09:00",
-    "validUntil": "2026-09-30T14:43:00+09:00",
+    "updatedAt": "2026-09-30T15:11:00+09:00",
+    "validUntil": "2026-09-30T15:41:00+09:00",
     "url": "https://github.com/halc8312/ai-company/blob/main/reports/chatgpt/work-status.json"
   }
 }
