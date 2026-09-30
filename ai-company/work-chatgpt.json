@@ -2,15 +2,15 @@
   "schemaVersion": 1,
   "slug": "chatgpt",
   "work": {
-    "state": "working",
-    "current": "#66販売用原本PDFの取得経路を調査。GitHub大容量binary取得失敗をSlackファイル添付による正規受け渡しで解消する。全文閲覧用138頁と販売用136頁は区別",
+    "state": "waiting",
+    "current": "#66 雨泊まりv2.1組版改訂を作成・検品。完全版120頁/試読9頁/シート4頁、目次22件一致。独立QA待ち。BOOTHは既存136頁版のまま。",
     "remaining": [
-      "eng: 既存mainの完全版PDF原本を#ai-companyファイル添付で引き渡し",
-      "chatgpt: 受領した原本のGit blob/SHA-256/136頁を照合し、#66承認済み範囲の既存BOOTH商品へ反映",
-      "chatgpt: #13次版差分/#98枠回復/#54初回/#5財務403/#57保留を追跡"
+      "qa: 修正版PDF3点と生成コードを独立確認。目次・情報分離・能力値・施設図の接続・全頁組版を照合",
+      "chatgpt: QA結果を受領して修正/反映を判断。既存BOOTH商品8906063への差し替え・配布実バイト確認は未実施",
+      "chatgpt: #13次版/#98実回復/#54初回/#5財務/#57保留の既存残件を追跡"
     ],
-    "updatedAt": "2026-09-30T15:11:00+09:00",
-    "validUntil": "2026-09-30T15:41:00+09:00",
+    "updatedAt": "2026-09-30T18:55:11+09:00",
+    "validUntil": "2026-09-30T19:25:11+09:00",
     "url": "https://github.com/halc8312/ai-company/blob/main/reports/chatgpt/work-status.json"
   }
 }
