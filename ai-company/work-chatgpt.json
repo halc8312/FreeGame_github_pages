@@ -2,14 +2,14 @@
   "schemaVersion": 1,
   "slug": "chatgpt",
   "work": {
-    "state": "waiting",
-    "current": "#66 雨泊まりv2.1の修正・検品と独立QA受入を終了。120/9/4頁。ユーザー確認用の改訂PDF3点を作成済み。既存BOOTH商品への差し替え・配布検証は次工程。",
+    "state": "working",
+    "current": "#66 雨泊まりv2.2の内容改訂。全6話の調査経路と終幕証拠、判定・代償・資源の裁定を統合し、3PDFを再検品中。",
     "remaining": [
-      "chatgpt: 既存巡回で商品8906063の現状と反映範囲を確認し、v2.1への差し替え/公開/配布実バイト照合を進める",
-      "chatgpt: #13次版/#98実回復/#54初回/#5財務/#57保留の既存残件を追跡"
+      "chatgpt: 内容改訂を統合し、失敗時の進行・全3PDFと全頁目視を検証、既存QAへ渡す",
+      "chatgpt: BOOTH未反映。#13/#98/#54/#5/#57の既存残件は継続"
     ],
-    "updatedAt": "2026-09-30T19:05:26+09:00",
-    "validUntil": "2026-09-30T19:35:26+09:00",
-    "url": "https://github.com/halc8312/ai-company/blob/main/reports/chatgpt/work-status.json"
+    "updatedAt": "2026-09-30T11:12:24.773Z",
+    "validUntil": "2026-09-30T11:42:24.773Z",
+    "url": "https://github.com/halc8312/ai-company/blob/chatgpt/amedoma-content-v22-20260930/reports/chatgpt/work-status.json"
   }
 }
